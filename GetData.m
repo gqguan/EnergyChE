@@ -1,4 +1,4 @@
-function dataset = GetData()
+function [dataset, FileNum] = GetData()
 %% Import data from selected spreadsheets
 %  
 %  1) Selected all spreadsheets needed to be imported
@@ -77,11 +77,11 @@ for i = 1:FileNum
     % Get the course id
     CourseID = VarName4(3);
     CourseID = [CourseID{:}];
-    CourseID = str2double(CourseID(6:end));
+    CourseID = CourseID(6:end);
     % Build the data set
     dataset(i).CourseID = CourseID;
     dataset(i).Course = Course;
     dataset(i).Teacher = Teacher;
-    dataset(i).Class = YearList(imax);
+    dataset(i).Class = strcat('class', YearList(imax));
     dataset(i).StudentScore = StudentScore;
 end
