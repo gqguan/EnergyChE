@@ -7,7 +7,7 @@
 %
 %  by Dr. GUAN Guoqiang @ SCUT on 2019/09/12
 %
-%% Multi-select files with UI dialog
+%% Multi-select files being imported
 clear;
 [FileNames, PathName] = uigetfile('*.*', 'Select files ...', 'Multiselect', 'on');
 % Note:
@@ -18,6 +18,8 @@ FileNames = cellstr(FileNames);
 PathName = cellstr(PathName);
 % Get the number of selected file in the dialog windows
 FileNum = length(FileNames);
+% Initialize the structure array
+dataset = repmat(struct([]), FileNum, 1);
 %
 %% Import the data one by one file
 for i = 1:FileNum
@@ -57,6 +59,7 @@ for i = 1:FileNum
     [~, imax] = max(countcats(categorical(Year)));
     YearList = categories(categorical(Year));
     idx_ext = find(strcmp(Year, YearList(imax)));
+    % Extract the students' info
     SN = SN(idx_ext);
     Year = Year(idx_ext);
     Name = Name(idx_ext);
@@ -74,11 +77,12 @@ for i = 1:FileNum
     % Get the course id
     CourseID = VarName4(3);
     CourseID = [CourseID{:}];
-    CourseID = CourseID(6:end);
+    CourseID = str2double(CourseID(6:end));
     % Build the data set
     dataset(i).CourseID = CourseID;
     dataset(i).Course = Course;
     dataset(i).Teacher = Teacher;
+    dataset(i).Class = YearList(imax);
     dataset(i).StudentScore = StudentScore;
 end
 % Clear temporary variables
