@@ -1,3 +1,4 @@
+function dataset = GetData()
 %% Import data from selected spreadsheets
 %  
 %  1) Selected all spreadsheets needed to be imported
@@ -8,7 +9,6 @@
 %  by Dr. GUAN Guoqiang @ SCUT on 2019/09/12
 %
 %% Multi-select files being imported
-clear;
 [FileNames, PathName] = uigetfile('*.*', 'Select files ...', 'Multiselect', 'on');
 % Note:
 % When only one file is selected, uigetfile() will return the char variable
@@ -85,5 +85,3 @@ for i = 1:FileNum
     dataset(i).Class = YearList(imax);
     dataset(i).StudentScore = StudentScore;
 end
-% Clear temporary variables
-clearvars -except dataset
