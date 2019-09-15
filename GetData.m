@@ -66,10 +66,20 @@ for i = 1:FileNum
     ExpGrade = ExpGrade(idx_ext);
     Overall = Overall(idx_ext);
     % Build the data table
-    students = table(SN, Name, Year, RegGrade, FinalExam, Overall);
+    StudentScore = table(SN, Name, Year, RegGrade, FinalExam, Overall);
+    % Get the teacher name
+    Teacher = VarName4(2);
+    Teacher = [Teacher{:}];
+    Teacher = Teacher(6:end);
+    % Get the course id
+    CourseID = VarName4(3);
+    CourseID = [CourseID{:}];
+    CourseID = CourseID(6:end);
     % Build the data set
+    dataset(i).CourseID = CourseID;
     dataset(i).Course = Course;
-    dataset(i).Student = students;
+    dataset(i).Teacher = Teacher;
+    dataset(i).StudentScore = StudentScore;
 end
 % Clear temporary variables
 clearvars -except dataset
