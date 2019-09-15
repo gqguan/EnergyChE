@@ -10,6 +10,13 @@
 %% Multi-select files with UI dialog
 clear;
 [FileNames, PathName] = uigetfile('*.*', 'Select files ...', 'Multiselect', 'on');
+% Note:
+% When only one file is selected, uigetfile() will return the char variable
+% and lead to the error in [FullPath{:}]. Use cellstr() to ensure the
+% variable be as cell objects.
+FileNames = cellstr(FileNames);
+PathName = cellstr(PathName);
+% Get the number of selected file in the dialog windows
 FileNum = length(FileNames);
 %
 %% Import the data one by one file
