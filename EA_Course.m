@@ -3,7 +3,6 @@
 %  by Dr. GUAN Guoqiang @ SCUT on 2019-09-14
 %
 %% Initialize
-clear;
 idx = 0;
 prompt1 = '输入课程名称后按回车\n课程名称： ';
 prompt2 = '输入该课程的教学目标数目';
@@ -86,6 +85,21 @@ B = RelateC2B(C, idx_UniNum);
 %  Evaluate the teaching objectives achievement
 [X, Y] = TeachObj(B, C, D, E, U);
 %%  Output
+if ~exist('db_Course', 'var')
+    n = 1;
+    db_Course(n) = struct('CourseName', name, 'ID', db_Curriculum.ID(idx), ...
+                          'Matrix_B', B, 'Matrix_C', C, 'Matrix_D', D, ...
+                          'Matrix_E', E, 'Matrix_U', U);
+else
+    n = length(db_Course)+1;
+    db_Course(n).CourseName = name;
+    db_Course(n).ID = db_Curriculum.ID(idx);
+    db_Course(n).Matrix_B = B;
+    db_Course(n).Matrix_C = C;
+    db_Course(n).Matrix_D = D;
+    db_Course(n).Matrix_E = E;
+    db_Course(n).Matrix_U = U;
+end
 GR_Achieve = X;
 Output = [db_GradRequire(idx_UniNum,:), table(GR_Achieve)];
 
