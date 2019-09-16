@@ -20,6 +20,8 @@ PathName = cellstr(PathName);
 FileNum = length(FileNames);
 % Initialize the structure array
 dataset = repmat(struct([]), FileNum, 1);
+% Set the wait bar
+wb_gui = waitbar(0, 'Importing transcripts ...');
 %
 %% Import the data one by one file
 for i = 1:FileNum
@@ -84,4 +86,9 @@ for i = 1:FileNum
     dataset(i).Teacher = Teacher;
     dataset(i).Class = strcat('class', YearList(imax));
     dataset(i).StudentScore = StudentScore;
+    % Feedback the progress of file import
+    filename = FileNames(i);
+    prompt = sprintf('%s imported ...', filename{:});
+    waitbar(i/FileNum, wb_gui, prompt)
 end
+close(wb_gui)
