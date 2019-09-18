@@ -47,21 +47,43 @@ for i = 1:FileNum
     % Get the data info according to the series number in VarName1
     idx = ~isnan(str2double(VarName1)); % indices of number
     NumStudent = sum(idx);
-    % Import data
-    SN = VarName2(idx);
+    % Initialize
+    j = 1;
+    Class = cell(NumStudent, 1);
+    SN = cell(NumStudent, 1);
+    Name = cell(NumStudent, 1);
+    RegGrade = zeros(size(Class));
+    MidExam = zeros(size(Class));
+    FinalExam = zeros(size(Class));
+    ExpGrade = zeros(size(Class));
+    Overall = zeros(size(Class));
+    % Change scale from 5 points to 100 points
+    VarName4 = ConvertScale5to100(VarName4);
+    VarName5 = ConvertScale5to100(VarName5);
+    VarName6 = ConvertScale5to100(VarName6);
+    VarName7 = ConvertScale5to100(VarName7);
+    VarName8 = ConvertScale5to100(VarName8);
+    % Import data row by row
+    for row = 6:length(idx)
+        if idx(row) == 0
+            ClassName = VarName1(row);
+        else
+            Class(j) = ClassName;
+            SN(j) = VarName2(row);
+            Name(j) = VarName3(row);
+            RegGrade(j) = str2double(VarName4(row));
+            MidExam(j) = str2double(VarName5(row));
+            FinalExam(j) = str2double(VarName6(row));
+            ExpGrade(j) = str2double(VarName7(row));
+            Overall(j) = str2double(VarName8(row));
+            j = j+1;
+        end
+    end
     Year = cellfun(@(x) x(1:4), SN, 'UniformOutput', false);
-    Name = VarName3(idx);
-    RegGrade = str2double(VarName4(idx));
-    MidExam = str2double(VarName5(idx));
-    FinalExam = str2double(VarName6(idx));
-    ExpGrade = str2double(VarName7(idx));
-    Overall = str2double(VarName8(idx));
-    % Extract the students being in the same year
-    % Find the year of most students being
-    [~, imax] = max(countcats(categorical(Year)));
-    YearList = categories(categorical(Year));
-    idx_ext = find(strcmp(Year, YearList(imax)));
+    % Extract the students of EnergyChE
+    idx_ext = cellfun(@(c) ischar(c) && ~isempty(strfind(c, 'ฤÜิด')), Class);
     % Extract the students' info
+    Class = Class(idx_ext);
     SN = SN(idx_ext);
     Year = Year(idx_ext);
     Name = Name(idx_ext);
@@ -71,7 +93,7 @@ for i = 1:FileNum
     ExpGrade = ExpGrade(idx_ext);
     Overall = Overall(idx_ext);
     % Build the data table
-    StudentScore = table(SN, Name, Year, RegGrade, FinalExam, Overall);
+    StudentScore = table(Class, SN, Name, Year, RegGrade, FinalExam, Overall);
     % Get the teacher name
     Teacher = VarName4(2);
     Teacher = [Teacher{:}];
@@ -84,7 +106,6 @@ for i = 1:FileNum
     dataset(i).CourseID = CourseID;
     dataset(i).Course = Course;
     dataset(i).Teacher = Teacher;
-    dataset(i).Class = strcat('class', YearList(imax));
     dataset(i).StudentScore = StudentScore;
     % Feedback the progress of file import
     filename = FileNames(i);
