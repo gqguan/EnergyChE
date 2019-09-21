@@ -1,120 +1,80 @@
-function [dataset, FileNum] = GetData()
-%% Import data from selected spreadsheets
-%  
-%  1) Selected all spreadsheets needed to be imported
-%  2) Convert data in each spreadsheet into a table
-%  3) Extract all student grades from the main class
-%  4) Build the data structure for each course
-%
-%  by Dr. GUAN Guoqiang @ SCUT on 2019/09/12
-%
-%% Multi-select files being imported
-[FileNames, PathName] = uigetfile('*.*', 'Select files ...', 'Multiselect', 'on');
-% Note:
-% When only one file is selected, uigetfile() will return the char variable
-% and lead to the error in [FullPath{:}]. Use cellstr() to ensure the
-% variable be as cell objects.
-FileNames = cellstr(FileNames);
-PathName = cellstr(PathName);
-% Get the number of selected file in the dialog windows
-FileNum = length(FileNames);
-% Initialize the structure array
-dataset = repmat(struct([]), FileNum, 1);
-% Set the wait bar
-wb_gui = waitbar(0, 'Importing transcripts ...');
-%
-%% Import the data one by one file
-for i = 1:FileNum
-    % Read the spreadsheet file
-    FullPath = strcat(PathName, FileNames(i));
-    [~, ~, raw] = xlsread([FullPath{:}],'Sheet1');
-    raw(cellfun(@(x) ~isempty(x) && isnumeric(x) && isnan(x),raw)) = {''};
-    cellVectors = raw(:,[1,2,3,4,5,6,7,8,9]);
-    % Allocate imported array to column variable names
-    VarName1 = cellVectors(:,1);
-    VarName2 = cellVectors(:,2);
-    VarName3 = cellVectors(:,3);
-    VarName4 = cellVectors(:,4);
-    VarName5 = cellVectors(:,5);
-    VarName6 = cellVectors(:,6);
-    VarName7 = cellVectors(:,7);
-    VarName8 = cellVectors(:,8);
-    VarName9 = cellVectors(:,9);
-    % Get the course name in VarName1(3)
-    Course = VarName1(3);
-    Course = [Course{:}];
-    Course = Course(6:end);
-    % Get the data info according to the series number in VarName1
-    idx = ~isnan(str2double(VarName1)); % indices of number
-    NumStudent = sum(idx);
-    % Initialize
-    j = 1;
-    Class = cell(NumStudent, 1);
-    SN = cell(NumStudent, 1);
-    Name = cell(NumStudent, 1);
-    RegGrade = zeros(size(Class));
-    MidExam = zeros(size(Class));
-    FinalExam = zeros(size(Class));
-    ExpGrade = zeros(size(Class));
-    Overall = zeros(size(Class));
-    % Change scale from 5 points to 100 points
-    VarName4 = ConvertScale(VarName4);
-    VarName5 = ConvertScale(VarName5);
-    VarName6 = ConvertScale(VarName6);
-    VarName7 = ConvertScale(VarName7);
-    VarName8 = ConvertScale(VarName8);
-    % Import data row by row
-    for row = 6:length(idx)
-        if idx(row) == 0
-            ClassName = VarName1(row);
-        else
-            Class(j) = ClassName;
-            SN(j) = VarName2(row);
-            Name(j) = VarName3(row);
-            RegGrade(j) = str2double(VarName4(row));
-            MidExam(j) = str2double(VarName5(row));
-            FinalExam(j) = str2double(VarName6(row));
-            ExpGrade(j) = str2double(VarName7(row));
-            Overall(j) = str2double(VarName8(row));
-            j = j+1;
+function [output] = GetData()
+%% Check the completion of importing all courses in three years
+% Initialize
+clear detail BlankRecord;
+load('database.mat')
+BlankRecord_idx = 1;
+detail = struct([]);
+BlankRecord = struct([]);
+output = struct([]);
+% Build a table to show the completion of file imported
+Years = {'class2013', 'class2014', 'class2015'};
+% Import all transcripts if dataset is not existed
+if ~exist('dataset', 'var')
+    [dataset, ~] = ImportTranscripts();
+end
+% Get all transcripts of given course according to the course ID
+for i = 1:height(db_Curriculum)
+    detail(i).ID = db_Curriculum.ID(i);
+    detail(i).Name = db_Curriculum.Name(i);
+    detail(i).Credit = db_Curriculum.Credit(i);
+    getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.ID(i)));
+    if ~isempty(getTranscript)
+        % Combine all students data into one table
+        AllStudents = getTranscript(1).StudentScore;
+        if length(getTranscript) >= 2
+            for j = 2:length(getTranscript)
+                AllStudents = [AllStudents; getTranscript(j).StudentScore];
+            end
+        end
+        % Get the categories according to year
+        YearList = categories(categorical(AllStudents.Year));
+        for j = 1:length(YearList)
+            fieldname = strcat('class', YearList(j)); 
+            fieldname = [fieldname{:}];
+            detail(i).(fieldname) = AllStudents(strcmp(AllStudents.Year, YearList(j)),:);
+        end     
+    end
+    for j = 1:length(Years)
+        fieldname = Years(j);
+        if isempty(detail(i).(fieldname{:}))
+            BlankRecord(BlankRecord_idx).idx = i;
+            BlankRecord(BlankRecord_idx).Name = db_Curriculum.Name(i);
+            BlankRecord(BlankRecord_idx).ID = db_Curriculum.ID(i);
+            BlankRecord(BlankRecord_idx).IDv2018 = db_Curriculum.IDv2018(i);
+            BlankRecord(BlankRecord_idx).class = fieldname;
+            BlankRecord_idx = BlankRecord_idx+1;
         end
     end
-    Year = cellfun(@(x) x(1:4), SN, 'UniformOutput', false);
-    % Extract the students of EnergyChE
-    idx_ext = cellfun(@(c) ischar(c) && ~isempty(strfind(c, 'ฤÜิด')), Class);
-    % Extract the students' info
-    Class = Class(idx_ext);
-    SN = SN(idx_ext);
-    Year = Year(idx_ext);
-    Name = Name(idx_ext);
-    RegGrade = RegGrade(idx_ext);
-    MidExam = MidExam(idx_ext);
-    FinalExam = FinalExam(idx_ext);
-    ExpGrade = ExpGrade(idx_ext);
-    Overall = Overall(idx_ext);
-    % Build the data table
-    StudentScore = table(Class, SN, Name, Year, RegGrade, FinalExam, Overall);
-    % Get the teacher name
-    Teacher = VarName4(2);
-    Teacher = [Teacher{:}];
-    Teacher = Teacher(6:end);
-    % Get the course id
-    CourseID = VarName4(3);
-    CourseID = [CourseID{:}];
-    CourseID = CourseID(6:end);
-    % Get the acadamic year
-    AcadYear = VarName1(4);
-    AcadYear = [AcadYear{:}];
-    AcadYear = AcadYear(7:15); % e.g. '2013-2014'
-    % Build the data set
-    dataset(i).AcadYear = AcadYear;
-    dataset(i).CourseID = CourseID;
-    dataset(i).Course = Course;
-    dataset(i).Teacher = Teacher;
-    dataset(i).StudentScore = StudentScore;
-    % Feedback the progress of file import
-    filename = FileNames(i);
-    prompt = sprintf('%s imported ...', filename{:});
-    waitbar(i/FileNum, wb_gui, prompt)
 end
-close(wb_gui)
+% Recheck the empty ones with IDv2018
+for BlankRecord_idx = 1:length(BlankRecord)
+    i = BlankRecord(BlankRecord_idx).idx;
+    getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.IDv2018(i)));
+    if ~isempty(getTranscript)
+        % Combine all students data into one table
+        AllStudents = getTranscript(1).StudentScore;
+        if length(getTranscript) >= 2
+            for j = 2:length(getTranscript)
+                AllStudents = [AllStudents; getTranscript(j).StudentScore];
+            end
+        end
+        % Get the categories according to year
+        YearList = categories(categorical(AllStudents.Year));
+        for j = 1:length(YearList)
+            fieldname = strcat('class', YearList(j)); 
+            fieldname = [fieldname{:}];
+            detail(i).(fieldname) = AllStudents(strcmp(AllStudents.Year, YearList(j)),:);
+        end     
+    end
+end
+% Output
+for course_sn = 1:length(detail)
+    output(course_sn).ID = detail(course_sn).ID;
+    output(course_sn).Name = detail(course_sn).Name;
+    output(course_sn).Credit = detail(course_sn).Credit;
+    for year_sn = 1:length(Years)
+        year = Years(year_sn); year = year{:};
+        output(course_sn).(year) = detail(course_sn).(year);        
+    end
+end
