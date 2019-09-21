@@ -1,18 +1,18 @@
 %% Check the completion of importing all courses in three years
 % Initialize
-clear output;
+clear detail BlankRecord;
 load('database.mat')
 BlankRecord_idx = 1;
 % Build a table to show the completion of file imported
 Years = {'class2013', 'class2014', 'class2015'};
 CourseNum = length(db_Curriculum.ID);
-output = table(db_Curriculum.ID, db_Curriculum.Name, ...
-               db_Curriculum.Credit, 'VariableNames', {'CourseID', ...
-               'CourseName', 'CourseCredit'});
-for i = 1:length(Years)
-    new_col = table(zeros(CourseNum, 1), 'VariableNames', Years(i));
-    output = [output, new_col];
-end
+% output = table(db_Curriculum.ID, db_Curriculum.Name, ...
+%                db_Curriculum.Credit, 'VariableNames', {'CourseID', ...
+%                'CourseName', 'CourseCredit'});
+% for i = 1:length(Years)
+%     new_col = table(zeros(CourseNum, 1), 'VariableNames', Years(i));
+%     output = [output, new_col];
+% end
 % Import all transcripts if dataset is not existed
 if ~exist('dataset', 'var')
     [dataset, transcript_num] = GetData();
@@ -59,6 +59,25 @@ for i = 1:height(db_Curriculum)
         end
     end
 end
-% Recheck the empty ones
-
+% Recheck the empty ones with IDv2018
+for BlankRecord_idx = 1:length(BlankRecord)
+    i = BlankRecord(BlankRecord_idx).idx;
+    getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.IDv2018(i)));
+    if ~isempty(getTranscript)
+        % Combine all students data into one table
+        AllStudents = getTranscript(1).StudentScore;
+        if length(getTranscript) >= 2
+            for j = 2:length(getTranscript)
+                AllStudents = [AllStudents; getTranscript(j).StudentScore];
+            end
+        end
+        % Get the categories according to year
+        YearList = categories(categorical(AllStudents.Year));
+        for j = 1:length(YearList)
+            fieldname = strcat('class', YearList(j)); 
+            fieldname = [fieldname{:}];
+            detail(i).(fieldname) = AllStudents(strcmp(AllStudents.Year, YearList(j)),:);
+        end     
+    end
+end
 % Output
