@@ -1,4 +1,4 @@
-function [output] = GetData()
+function [output, db_Curriculum, db_GradRequire] = GetData()
 %% Check the completion of importing all courses in three years
 % Initialize
 clear detail BlankRecord;
@@ -59,13 +59,10 @@ for BlankRecord_idx = 1:length(BlankRecord)
                 AllStudents = [AllStudents; getTranscript(j).StudentScore];
             end
         end
-        % Get the categories according to year
-        YearList = categories(categorical(AllStudents.Year));
-        for j = 1:length(YearList)
-            fieldname = strcat('class', YearList(j)); 
-            fieldname = [fieldname{:}];
-            detail(i).(fieldname) = AllStudents(strcmp(AllStudents.Year, YearList(j)),:);
-        end     
+        % Get the given year
+        fieldname = BlankRecord(BlankRecord_idx).class; 
+        fieldname = [fieldname{:}]; year = fieldname((end-3):end);
+        detail(i).(fieldname) = AllStudents(strcmp(AllStudents.Year, year),:); 
     end
 end
 % Output

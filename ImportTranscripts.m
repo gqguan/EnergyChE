@@ -81,7 +81,7 @@ for i = 1:FileNum
     end
     Year = cellfun(@(x) x(1:4), SN, 'UniformOutput', false);
     % Extract the students of EnergyChE
-    idx_ext = cellfun(@(c) ischar(c) && ~isempty(strfind(c, '能源')), Class);
+    idx_ext = cellfun(@(c) ischar(c) && ~isempty(strfind(c, '能源化学')), Class);
     % Extract the students' info
     Class = Class(idx_ext);
     SN = SN(idx_ext);
