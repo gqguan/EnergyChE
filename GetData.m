@@ -58,11 +58,11 @@ for i = 1:FileNum
     ExpGrade = zeros(size(Class));
     Overall = zeros(size(Class));
     % Change scale from 5 points to 100 points
-    VarName4 = ConvertScale5to100(VarName4);
-    VarName5 = ConvertScale5to100(VarName5);
-    VarName6 = ConvertScale5to100(VarName6);
-    VarName7 = ConvertScale5to100(VarName7);
-    VarName8 = ConvertScale5to100(VarName8);
+    VarName4 = ConvertScale(VarName4);
+    VarName5 = ConvertScale(VarName5);
+    VarName6 = ConvertScale(VarName6);
+    VarName7 = ConvertScale(VarName7);
+    VarName8 = ConvertScale(VarName8);
     % Import data row by row
     for row = 6:length(idx)
         if idx(row) == 0
@@ -102,7 +102,12 @@ for i = 1:FileNum
     CourseID = VarName4(3);
     CourseID = [CourseID{:}];
     CourseID = CourseID(6:end);
+    % Get the acadamic year
+    AcadYear = VarName1(4);
+    AcadYear = [AcadYear{:}];
+    AcadYear = AcadYear(7:15); % e.g. '2013-2014'
     % Build the data set
+    dataset(i).AcadYear = AcadYear;
     dataset(i).CourseID = CourseID;
     dataset(i).Course = Course;
     dataset(i).Teacher = Teacher;
