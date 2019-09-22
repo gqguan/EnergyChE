@@ -1,5 +1,16 @@
-function [output, db_Curriculum, db_GradRequire] = GetData()
+function [output, db_Curriculum, db_GradRequire] = GetData(Years)
 %% Check the completion of importing all courses in three years
+%
+% input arguments
+% Years - (str array) default as {'class2013', 'class2014', 'class2015'}
+%
+% output arguments
+% output - (struct array) outcomes for all courses
+% db_Curriculum - (table) preset curriculum
+% db_GradRequire - (table) preset graduation requirement
+%
+% by Dr. GUAN Guoqiang @ SCUT on 2019/9/21
+%
 % Initialize
 clear detail BlankRecord;
 load('database.mat')
@@ -7,8 +18,10 @@ BlankRecord_idx = 1;
 detail = struct([]);
 BlankRecord = struct([]);
 output = struct([]);
-% Build a table to show the completion of file imported
-Years = {'class2013', 'class2014', 'class2015'};
+% Build a default table to show the completion of file imported
+if nargin < 1
+    Years = {'class2013', 'class2014', 'class2015'};
+end
 % Import all transcripts if dataset is not existed
 if ~exist('dataset', 'var')
     [dataset, ~] = ImportTranscripts();
