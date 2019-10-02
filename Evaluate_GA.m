@@ -4,14 +4,18 @@
 %
 % Initialize
 clear;
-Years = {'class2013'};
+Years = {'class2015'};
 % Get data for processing
+year = Years{:};
+msg_str = sprintf('Getting data of %s from stored workspace.', year);
+Setlog(msg_str, 3);
 [db_Outcome, db_Curriculum, db_GradRequire] = GetData(Years);
 %
 %% Build the default matrices for evaluating the teaching objectives of each
 % course listed in db_Curriculum
 CorrelateMatrix = struct([]);
 NumCourse = length(db_Outcome);
+Setlog('Building the default matrices for objective evaluation.', 3);
 for course_sn = 1:NumCourse
     % Number of supported indicators in this course
     idx_UniNum = find(db_Curriculum.ReqMatrix(course_sn,:));
@@ -44,14 +48,14 @@ for course_sn = 1:NumCourse
 end
 %
 %% Evaluate the completeness of teaching objectives in each course
+Setlog('Evaluating the goal achievement according to the transcripts.', 3);
 for course_sn = 1:NumCourse
-    year = Years{:};
     detail = db_Outcome(course_sn).(year);
     outcome = mean([detail.RegGrade, detail.FinalExam, detail.Overall], 'omitnan')';
-    if sum(~isnan(outcome)) == 3
-        CorrelateMatrix(course_sn).U = outcome(1:2);
+    if sum(~isnan(outcome)) == 3 % 当成绩单中存在平时、期末和综合3个成绩时
+        CorrelateMatrix(course_sn).U = outcome(1:2); % 只取平时和期末成绩
     else
-        CorrelateMatrix(course_sn).U = outcome(3);
+        CorrelateMatrix(course_sn).U = outcome(3); % 否则只取综合成绩
         % Rebuild the matrix D due to only the overall score existed in the
         % transcript
         N = size(CorrelateMatrix(course_sn).D, 1);
@@ -68,7 +72,30 @@ for course_sn = 1:NumCourse
     db_Outcome(course_sn).Y = Y;
 end
 %
+%% 输入课程质量评价结果更新db_Outcome
+if exist('QE_Courses.mat', 'file') == 2 % 课程质量评价结果存盘变量
+    load('QE_Courses.mat')
+    Setlog('Load the found QE_Courses.mat.', 3);
+    for i = 1:length(QE_Course)
+        outcome_idx = find(strcmp(QE_Course(i).ID, [db_Outcome.ID]));
+        % 检查指标点数目是否一致
+        if length(db_Outcome(outcome_idx).X) == length(QE_Course(i).(year))
+            msg_str = sprintf('Update %s in db_Outcome with the one in QE_Course', QE_Course(i).Name);
+            Setlog(msg_str, 3);
+            X = QE_Course(i).(year); % 用QE_Course中的结果
+            B = CorrelateMatrix(outcome_idx).B;
+            Y = B*X;
+            db_Outcome(outcome_idx).X = X;
+            db_Outcome(outcome_idx).Y = Y;
+        else
+            msg_str = sprintf('[Warning] Skip to update %s due to inconsistant number of indicators!', QE_Course(i).Name);
+            Setlog(msg_str, 3);
+        end
+    end
+end
+%
 %% List the supported courses for each indicator of graduation requirement
+Setlog('Listing the courses for each indicator of graduation requirement.', 3);
 NumIndicator = size(db_Curriculum.ReqMatrix, 2);
 output = struct([]);
 row = 0;
@@ -90,6 +117,7 @@ for indicator_sn = 1:NumIndicator
 end
 %
 %% Save the results 
+Setlog('Rebuilding a table to show the goal achievement.', 3);
 % Rebuild the table to export
 output_table = cell(row, 7);
 row1 = 1;
@@ -104,5 +132,10 @@ for indicator_sn = 1:NumIndicator
 end
 % Export results
 output_table = cell2table(output_table);
+output_table.Properties.VariableNames = {'UniNum', 'Specification', 'Courses', 'Credit', 'Weight', 'QE', 'GA'};
 filename = strcat(year, '.xlsx');
+msg_str = sprintf('Export results of goal achievement in %s.', filename);
+Setlog(msg_str, 3);
+% writetable(output_table, filename, 'FileType', 'spreadsheet', 'Sheet', year)
 writetable(output_table, filename, 'Sheet', 1)
+%
