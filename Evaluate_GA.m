@@ -137,5 +137,7 @@ filename = strcat(year, '.xlsx');
 msg_str = sprintf('Export results of goal achievement in %s.', filename);
 Setlog(msg_str, 3);
 % writetable(output_table, filename, 'FileType', 'spreadsheet', 'Sheet', year)
-writetable(output_table, filename, 'Sheet', 1)
+writetable(output_table, filename, 'Sheet', '毕业要求达成度')
+writetable(db_GradRequire, filename, 'Sheet', '毕业要求指标点列表')
+writetable(db_Curriculum(:, [4,5,7]), filename, 'Sheet', '课程支撑指标点矩阵')
 %
