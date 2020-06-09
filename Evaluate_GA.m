@@ -1,16 +1,24 @@
 %% Evaluate the graduation achievement
+% 功能说明
+%   进行指定年级的毕业要求达成度计算，输出相应的Excel文件
+% 程序过程
+%   1 调用GetData.m得指定年级的全部课程成绩单，课程列表和毕业要求指标点
+%   2 对课程列表中的每门课程进行达成度计算
+%     其中，用QE_Courses.mat中进行了达成度分析的课程替换该课程的达成度计算结果
+%   3 将指定年级的毕业要求达成度计算结果输出为Excel工作簿文件
 %
 % by Dr. GUAN Guoqiang @ SCUT on 2019/9/21
 %
-% Initialize
+
+%% Initialize
 clear;
-Years = {'class2015'};
+Years = {'class2015'}; % 该值为进行毕业要求达成度计算的学生年级
 % Get data for processing
 year = Years{:};
 msg_str = sprintf('Getting data of %s from stored workspace.', year);
 Setlog(msg_str, 3);
 [db_Outcome, db_Curriculum, db_GradRequire] = GetData(Years);
-%
+
 %% Build the default matrices for evaluating the teaching objectives of each
 % course listed in db_Curriculum
 CorrelateMatrix = struct([]);
@@ -71,7 +79,7 @@ for course_sn = 1:NumCourse
     db_Outcome(course_sn).X = X;
     db_Outcome(course_sn).Y = Y;
 end
-%
+
 %% 输入课程质量评价结果更新db_Outcome
 if exist('QE_Courses.mat', 'file') == 2 % 课程质量评价结果存盘变量
     load('QE_Courses.mat')
@@ -93,7 +101,7 @@ if exist('QE_Courses.mat', 'file') == 2 % 课程质量评价结果存盘变量
         end
     end
 end
-%
+
 %% List the supported courses for each indicator of graduation requirement
 Setlog('Listing the courses for each indicator of graduation requirement.', 3);
 NumIndicator = size(db_Curriculum.ReqMatrix, 2);
@@ -115,7 +123,7 @@ for indicator_sn = 1:NumIndicator
     output(indicator_sn).Achievement = Achievement;
     row = row+course_num;
 end
-%
+
 %% Save the results 
 Setlog('Rebuilding a table to show the goal achievement.', 3);
 % Rebuild the table to export
@@ -140,4 +148,3 @@ Setlog(msg_str, 3);
 writetable(output_table, filename, 'Sheet', '毕业要求达成度')
 writetable(db_GradRequire, filename, 'Sheet', '毕业要求指标点列表')
 writetable(db_Curriculum(:, [4,5,7]), filename, 'Sheet', '课程支撑指标点矩阵')
-%
