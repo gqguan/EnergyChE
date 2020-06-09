@@ -144,7 +144,8 @@ output_table.Properties.VariableNames = {'UniNum', 'Specification', 'Courses', '
 filename = strcat(year, '.xlsx');
 msg_str = sprintf('Export results of goal achievement in %s.', filename);
 Setlog(msg_str, 3);
-% writetable(output_table, filename, 'FileType', 'spreadsheet', 'Sheet', year)
+% 在指定工作簿中输出3个工作表
+warning off MATLAB:xlswrite:AddSheet % 关闭新建表的警告提示
 writetable(output_table, filename, 'Sheet', '毕业要求达成度')
 writetable(db_GradRequire, filename, 'Sheet', '毕业要求指标点列表')
 writetable(db_Curriculum(:, [4,5,7]), filename, 'Sheet', '课程支撑指标点矩阵')
