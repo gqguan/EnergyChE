@@ -1,6 +1,12 @@
 function [output, db_Curriculum, db_GradRequire] = GetData(Years)
-%% Check the completion of importing all courses in three years
+%% 从工作空间中的dataset变量中提取指定年级的各课程全部学生成绩单
 %
+% 功能说明：
+% （1）可不输入输入参数，程序按缺省值导入
+% （2）课程按db_Curriculum中的课程排序，通过匹对课程编号CourseID识别
+% （3）若按db_Curriculum中CourseID找不到任何课程成绩单，再按IDv2018匹对
+%
+% 参数说明：
 % input arguments
 % Years - (str array) default as {'class2013', 'class2014', 'class2015'}
 %
@@ -10,8 +16,8 @@ function [output, db_Curriculum, db_GradRequire] = GetData(Years)
 % db_GradRequire - (table) preset graduation requirement
 %
 % by Dr. GUAN Guoqiang @ SCUT on 2019/9/21
-%
-% Initialize
+
+%% Initialize
 clear detail BlankRecord;
 load('database.mat')
 BlankRecord_idx = 1;
@@ -26,7 +32,8 @@ end
 if ~exist('dataset', 'var')
     [dataset, ~] = ImportTranscripts();
 end
-% Get all transcripts of given course according to the course ID
+
+%% Get all transcripts of given course according to the course ID
 for i = 1:height(db_Curriculum)
     detail(i).ID = db_Curriculum.ID(i);
     detail(i).Name = db_Curriculum.Name(i);
@@ -60,7 +67,8 @@ for i = 1:height(db_Curriculum)
         end
     end
 end
-% Recheck the empty ones with IDv2018
+
+%% Recheck the empty ones with IDv2018
 for BlankRecord_idx = 1:length(BlankRecord)
     i = BlankRecord(BlankRecord_idx).idx;
     getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.IDv2018(i)));
@@ -78,7 +86,8 @@ for BlankRecord_idx = 1:length(BlankRecord)
         detail(i).(fieldname) = AllStudents(strcmp(AllStudents.Year, year),:); 
     end
 end
-% Output
+
+%% Output
 for course_sn = 1:length(detail)
     output(course_sn).ID = detail(course_sn).ID;
     output(course_sn).Name = detail(course_sn).Name;
