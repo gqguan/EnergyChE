@@ -4,7 +4,10 @@
 
 %% 初始化
 % 检查工作空间中有无达成度分析结果
-
+if ~exist('db_Outcome', 'var')
+    disp('Required variable of db_Outcome is NOT existed')
+    return
+end
 % 载入Matlab报表生成器
 import mlreportgen.dom.*
 % 定义表属性
