@@ -92,7 +92,7 @@ for i = 1:FileNum
     ExpGrade = ExpGrade(idx_ext);
     Overall = Overall(idx_ext);
     % Build the data table
-    StudentScore = table(Class, SN, Name, Year, RegGrade, FinalExam, Overall);
+    StudentScore = table(Class, SN, Name, Year, RegGrade, MidExam, FinalExam, ExpGrade, Overall);
     % Get the teacher name
     Teacher = VarName4(2);
     Teacher = [Teacher{:}];
