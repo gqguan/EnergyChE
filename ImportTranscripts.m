@@ -41,8 +41,7 @@ for i = 1:FileNum
     VarName8 = cellVectors(:,8);
     VarName9 = cellVectors(:,9);
     % Get the course name in VarName1(3)
-    Course = VarName1(3);
-    Course = [Course{:}];
+    Course = VarName1{3};
     Course = Course(6:end);
     % Get the data info according to the series number in VarName1
     idx = ~isnan(str2double(VarName1)); % indices of number
@@ -99,12 +98,10 @@ for i = 1:FileNum
     Teacher = [Teacher{:}];
     Teacher = Teacher(6:end);
     % Get the course id
-    CourseID = VarName4(3);
-    CourseID = [CourseID{:}];
+    CourseID = VarName4{3};
     CourseID = CourseID(6:end);
     % Get the acadamic year
-    AcadYear = VarName1(4);
-    AcadYear = [AcadYear{:}];
+    AcadYear = VarName1{4};
     AcadYear = AcadYear(7:15); % e.g. '2013-2014'
     % Build the data set
     dataset(i).AcadYear = AcadYear;
