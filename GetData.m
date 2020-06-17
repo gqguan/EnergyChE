@@ -35,6 +35,9 @@ end
 
 %% Get all transcripts of given course according to the course ID
 for i = 1:height(db_Curriculum)
+%     if i == 49
+%         disp('debugging')
+%     end
     detail(i).ID = db_Curriculum.ID(i);
     detail(i).Name = db_Curriculum.Name(i);
     detail(i).Credit = db_Curriculum.Credit(i);
@@ -65,13 +68,15 @@ for i = 1:height(db_Curriculum)
     end
     for j = 1:length(Years)
         fieldname = Years(j);
-        if ~ismember(fieldnames(detail(i)), fieldname{:})
-            BlankRecord(BlankRecord_idx).idx = i;
-            BlankRecord(BlankRecord_idx).Name = db_Curriculum.Name(i);
-            BlankRecord(BlankRecord_idx).ID = db_Curriculum.ID(i);
-            BlankRecord(BlankRecord_idx).IDv2018 = db_Curriculum.IDv2018(i);
-            BlankRecord(BlankRecord_idx).class = fieldname;
-            BlankRecord_idx = BlankRecord_idx+1;
+        if find(ismember(fieldnames(detail(i)), fieldname{:})) ~= 0
+            if isempty(detail(i).(fieldname{:}))
+                BlankRecord(BlankRecord_idx).idx = i;
+                BlankRecord(BlankRecord_idx).Name = db_Curriculum.Name(i);
+                BlankRecord(BlankRecord_idx).ID = db_Curriculum.ID(i);
+                BlankRecord(BlankRecord_idx).IDv2018 = db_Curriculum.IDv2018(i);
+                BlankRecord(BlankRecord_idx).class = fieldname;
+                BlankRecord_idx = BlankRecord_idx+1;
+            end
         end
     end
 end
