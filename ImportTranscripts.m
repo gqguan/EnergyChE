@@ -100,10 +100,11 @@ for i = 1:FileNum
     % Get the course id
     CourseID = VarName4{3};
     CourseID = CourseID(6:end);
-    % 提取“选课代码”
-    CourseCode = VarName1{4};
     % Get the acadamic year
+    CourseCode = VarName1{4};
     AcadYear = CourseCode(7:15); % e.g. '2013-2014'
+    % 提取“选课代码”
+    CourseCode = CourseCode(6:end);
     % Build the data set
     dataset(i).AcadYear = AcadYear;
     dataset(i).CourseID = CourseID;
