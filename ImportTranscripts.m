@@ -100,13 +100,15 @@ for i = 1:FileNum
     % Get the course id
     CourseID = VarName4{3};
     CourseID = CourseID(6:end);
+    % 提取“选课代码”
+    CourseCode = VarName1{4};
     % Get the acadamic year
-    AcadYear = VarName1{4};
-    AcadYear = AcadYear(7:15); % e.g. '2013-2014'
+    AcadYear = CourseCode(7:15); % e.g. '2013-2014'
     % Build the data set
     dataset(i).AcadYear = AcadYear;
     dataset(i).CourseID = CourseID;
     dataset(i).Course = Course;
+    dataset(i).CourseCode = CourseCode;
     dataset(i).Teacher = Teacher;
     dataset(i).StudentScore = StudentScore;
     % Feedback the progress of file import
