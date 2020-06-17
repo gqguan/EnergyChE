@@ -40,11 +40,19 @@ for i = 1:height(db_Curriculum)
     detail(i).Credit = db_Curriculum.Credit(i);
     getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.ID(i)));
     if ~isempty(getTranscript)
-        % Combine all students data into one table
-        AllStudents = getTranscript(1).StudentScore;
+        % 附加教师和选课代码
+        clear Teacher CourseCode
+        Teacher(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).Teacher};
+        CourseCode(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).CourseCode};
+        AllStudents = [getTranscript(1).StudentScore, table(Teacher), table(CourseCode)];
+        % 当同一门课程有多张成绩单时，把成绩单上的学生列表合并
         if length(getTranscript) >= 2
             for j = 2:length(getTranscript)
-                AllStudents = [AllStudents; getTranscript(j).StudentScore];
+                clear Teacher CourseCode
+                Teacher(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).Teacher};
+                CourseCode(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).CourseCode};
+                AddStudents = [getTranscript(j).StudentScore, table(Teacher), table(CourseCode)];
+                AllStudents = [AllStudents; AddStudents];
             end
         end
         % Get the categories according to year
@@ -73,11 +81,17 @@ for BlankRecord_idx = 1:length(BlankRecord)
     i = BlankRecord(BlankRecord_idx).idx;
     getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.IDv2018(i)));
     if ~isempty(getTranscript)
-        % Combine all students data into one table
-        AllStudents = getTranscript(1).StudentScore;
+        clear Teacher CourseCode
+        Teacher(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).Teacher};
+        CourseCode(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).CourseCode};
+        AllStudents = [getTranscript(1).StudentScore, table(Teacher), table(CourseCode)];
         if length(getTranscript) >= 2
             for j = 2:length(getTranscript)
-                AllStudents = [AllStudents; getTranscript(j).StudentScore];
+                clear Teacher CourseCode
+                Teacher(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).Teacher};
+                CourseCode(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).CourseCode};
+                AddStudents = [getTranscript(j).StudentScore, table(Teacher), table(CourseCode)];
+                AllStudents = [AllStudents; AddStudents];
             end
         end
         % Get the given year
