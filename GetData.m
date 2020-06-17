@@ -57,7 +57,7 @@ for i = 1:height(db_Curriculum)
     end
     for j = 1:length(Years)
         fieldname = Years(j);
-        if isempty(detail(i).(fieldname{:}))
+        if ~ismember(fieldnames(detail(i)), fieldname{:})
             BlankRecord(BlankRecord_idx).idx = i;
             BlankRecord(BlankRecord_idx).Name = db_Curriculum.Name(i);
             BlankRecord(BlankRecord_idx).ID = db_Curriculum.ID(i);
