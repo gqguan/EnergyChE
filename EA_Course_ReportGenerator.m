@@ -99,12 +99,25 @@ for i=1:length(db_Outcome)
     moveToNextHole(d);
     % 插入“达成度分析说明”
     append(d, '达成度分析说明（示例）');
+    % 移位到下一标志位
+    moveToNextHole(d);
+    % 换页
+    append(d, PageBreak());
+    
+    % 移位到下一标志位
+    moveToNextHole(d);
+    % 插入课程名称
+    append(d, db_Outcome(i).Name{:});
+    
+    % 移位到下一标志位
+    moveToNextHole(d); 
+    % 插入“上课学期”（通过截取成绩单的第1个同学课程代码中的前13个字符）
+    append(d, db_Outcome(i).(class).CourseCode{1}(1:13));
     
     % 学生成绩单
     tout_Details = db_Outcome(i).(class);
-    tout_Details(:,4) = [];
     % 转化为mlreportgen.dom.Table对象【编程要点】
-    tout_Details = Table(tout_Details); 
+    tout_Details = Table(tout_Details(:,[1:3,5:(end-2)])); 
     
     % 定义“学生成绩单”列数
     grps_Details(1) = TableColSpecGroup;
