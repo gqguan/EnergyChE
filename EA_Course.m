@@ -1,15 +1,25 @@
 %% Assist to evaluate the teaching objective achievement
 %
+% 参数说明
+% 输入参数：CourseName - char 进行课程目标达成度分析的课程名称
+%          Class      - char 进行课程目标达成度分析的课程年级
+%          WayDefs    - double array 考查方式定义向量
+% 输出参数：QE_Course  - struct 课程目标达成度分析结果
+%
 %  by Dr. GUAN Guoqiang @ SCUT on 2019-09-14
 %
 
-function out = EA_Course(CourseName)
+function QE_Course = EA_Course(CourseName, Class, WayDefs)
 %% Initialize
+opt = 0; % 运行模式为安静模式
 idx = 0;
-prompt1 = '输入课程名称后按回车\n课程名称： ';
-prompt2 = '输入该课程的教学目标数目';
+prompt0 = '输入进行课程达成度分析的课程名称后按回车\n课程名称： ';
+prompt1 = '输入相应的年级（例如class2013）：';
+prompt2 = '输入该课程的教学目标数目：';
 if nargin == 0 %  Input the course name
-    CourseName = input(prompt1, 's');
+    CourseName = input(prompt0, 's');
+    Class = input(prompt1, 's');
+    opt = 1; % 运行模式为对话输入模式
 end
 
 %% 根据输入课程名称在db_Curriculum中获取该课程支撑的毕业要求指标点
@@ -31,79 +41,56 @@ if idx == 0
 else
     fprintf('Input course is found as \n');
     idx_UniNum = find(db_Curriculum.ReqMatrix(idx,:));
-    db_GradRequire(idx_UniNum,:)
     M = sum(db_Curriculum.ReqMatrix(idx,:)); % number of supported indicator
 end
+
+%% 调用GetData导入全部课程的成绩单
+db_Outcome = GetData({Class});
+Transcript = db_Outcome(idx).(Class);
+if isempty(Transcript)
+    disp('No transcript in dataset and STOP')
+    return
+end
+QE_Course.ID = db_Curriculum.ID{idx};
+QE_Course.Name = db_Curriculum.Name{idx};
+QE_Course.(Class).Requirements.IdxUniNum = idx_UniNum;
+QE_Course.(Class).Requirements.Description = db_GradRequire(idx_UniNum,2);
+
 %% Supply info in syllabus
 %  Input the number of teaching objectives
-prompt2 = sprintf('%s [直接回车输入缺省值 %d ]: ', prompt2, M);
-N = input(prompt2);
-if isempty(N)
-   N = M; % Default value
-end
-%  Input the relation matrix of teaching objectives and supported
-%  graduation requirement
-prompt3 = '输入教学目标与毕业要求指标点的关系矩阵[M,N] [直接回车输入缺省值] ';
-C = input(prompt3);
-if isempty(C)
-    C = eye(M); %  Default matrix of C(M,N), where M=N
-end
-if M ~= size(C, 1) && N ~= size(C, 2)
-    fprintf('Error: size(C,1) = %d not %d, or size(C,2) = %d not %d \n', ...
-            size(C, 1), M, size(C, 2), N);
-    return
-end
-%  Input the relation matrix of teaching contents and objectives
-prompt4 = '输入教学内容与教学目标的关系矩阵[N,L] [直接回车输入缺省值] ';
-D = input(prompt4);
-if isempty(D)
-    D = zeros(N, 2); % Default matrix of D(N,L), where L=2 as only regular
-                     % grade and final score were used in student
-                     % performance sheet
-    D(:,1) = 0.3; % weight of regular grade
-    D(:,2) = 0.7; % weight of score in final exam
-end
-L = size(D, 2);
-if N ~= size(D, 1)
-    fprintf('Error: size(D,1) = %d not %d \n', size(D, 1), N);
-    return
-end
-%  Input the evaluation matrix of teaching contents
-prompt5 = '输入教学内容评测结果矩阵[L,J] ';
-U = input(prompt5);
-if L ~= size(U, 1)
-    fprintf('Error: size(V,1) = %d not %d \n', size(U, 1), L);
-    return
-end
-J = size(U, 2);
-%  Input the weight array of evaluation
-prompt6 = '输入各次评测的权重向量 [直接回车输入缺省值] ';
-E = input(prompt6);
-if isempty(E)
-    E(1:J,1) = 1/J;
-end
-%%  Conduct the evaluation
-%  Build the matrices of C and B
-B = RelateC2B(C, idx_UniNum);
-%  Evaluate the teaching objectives achievement
-[X, Y] = TeachObj(B, C, D, E, U);
-%%  Output
-if ~exist('db_Course', 'var')
-    n = 1;
-    db_Course(n) = struct('CourseName', name, 'ID', db_Curriculum.ID(idx), ...
-                          'Matrix_B', B, 'Matrix_C', C, 'Matrix_D', D, ...
-                          'Matrix_E', E, 'Matrix_U', U);
+if opt == 1
+    prompt2 = sprintf('%s [直接回车输入缺省值 %d ]: ', prompt2, M);
+    N = input(prompt2);
+    if isempty(N)
+       N = M; % Default value
+    end
+    %  Input the relation matrix of teaching objectives and supported
+    %  graduation requirement
+    prompt3 = '输入教学目标与毕业要求指标点的关系矩阵[M,N] [直接回车输入缺省值] ';
+    C = input(prompt3);
+    if isempty(C)
+        C = eye(M); %  Default matrix of C(M,N), where M=N
+    end
+    if M ~= size(C, 1) && N ~= size(C, 2)
+        fprintf('Error: size(C,1) = %d not %d, or size(C,2) = %d not %d \n', ...
+                size(C, 1), M, size(C, 2), N);
+        return
+    end
 else
-    n = length(db_Course)+1;
-    db_Course(n).CourseName = name;
-    db_Course(n).ID = db_Curriculum.ID(idx);
-    db_Course(n).Matrix_B = B;
-    db_Course(n).Matrix_C = C;
-    db_Course(n).Matrix_D = D;
-    db_Course(n).Matrix_E = E;
-    db_Course(n).Matrix_U = U;
+    N = M;
+    C = eye(M);
 end
-GR_Achieve = X;
-Output = [db_GradRequire(idx_UniNum,:), table(GR_Achieve)];
+QE_Course.(Class).RelMatrix.Req2Obj = C;
+
+%  Input the relation matrix of teaching contents and objectives
+if opt == 1
+    prompt4 = '输入教学目标考查方式的定义向量 [直接回车输入缺省值：通过期末考试的综合成绩评价] ';
+    WayDefs = input(prompt4);
+    if isempty(WayDefs)
+        WayDefs = [1];
+    end
+end
+QE_Course.(Class).Evaluation.WayDefs = WayDefs;
+
 
 end

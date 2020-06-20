@@ -95,6 +95,10 @@ for i=1:length(db_Outcome)
     % 插入“达成度计算表”
     append(d, tout_HowToCalc);
     
+    %
+    moveToNextHole(d)
+    append(d, '0.746')
+    
     % 移位到下一标志位
     moveToNextHole(d);
     % 插入“达成度分析说明”

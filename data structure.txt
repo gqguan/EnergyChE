@@ -1,0 +1,21 @@
+QE_Courses
+	ID
+	Name
+	Class(2013)
+		Requirements
+			IdxUniNum - double array(M)
+			Description - cell array(M)
+		Objectives - cell array(N)
+		Evaluation - struct
+			WayDefs - double array(NumType), e.g., [5 4 1]
+			Types - struct array(length(WayDefs))
+				Description - string, e.g., 'A'
+				Weight - double, e.g., 0.25
+			Ways - struct array(sum(WayDefs))
+				Description - string, e.g., 'A1'
+				Weight - double, e.g., 0.05
+				FullCredits - double, e.g., 100
+		RelMatrix - struct
+			Req2Obj - double matrix(M,N)
+			Obj2Content - double matrix(N,sum(WayDefs))
+		Transcript - table
