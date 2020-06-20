@@ -2,21 +2,24 @@
 %
 %  by Dr. GUAN Guoqiang @ SCUT on 2019-09-14
 %
+
+function out = EA_Course(CourseName)
 %% Initialize
 idx = 0;
 prompt1 = '输入课程名称后按回车\n课程名称： ';
 prompt2 = '输入该课程的教学目标数目';
-%% Acquire the supported indicators of graduation requirement
-%  Input the course name
-CourseName = input(prompt1, 's');
+if nargin == 0 %  Input the course name
+    CourseName = input(prompt1, 's');
+end
+
+%% 根据输入课程名称在db_Curriculum中获取该课程支撑的毕业要求指标点
 %  Acquire the preset course info 
-load('database.mat');
+load('database.mat', 'db_Curriculum', 'db_GradRequire');
 K = length(db_Curriculum.Name); % number of courses
 for i = 1:K
-    name = db_Curriculum.Name(i);
-    name = [name{:}];
+    name = db_Curriculum.Name{i};
     if size(CourseName) == size(name)
-        if CourseName == name;
+        if CourseName == name
             idx = i;
             break
         end
@@ -103,3 +106,4 @@ end
 GR_Achieve = X;
 Output = [db_GradRequire(idx_UniNum,:), table(GR_Achieve)];
 
+end
