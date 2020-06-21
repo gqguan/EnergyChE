@@ -86,7 +86,20 @@ if opt == 1
     end
 end
 
-%% 构造QE_Course
+%% 输出
+% 定义成绩单的数据结构
+Def_EvalWays = struct('Description', 'X大题XX小题', ...
+                      'Weight', 0.05, ...
+                      'FullCredit', 2);
+Def_EvalTypes = struct('Description', '期末考试', ...
+                       'Code', 'A', ...
+                       'Weight', 0.7, ...
+                       'EvalWays', struct);
+Def_Definition = struct('Spec', [5 4 1], ...
+                        'EvalTypes', struct);
+Def_Transcript = struct('Definition', struct, ...
+                        'Detail', table);
+% 构造QE_Course
 QE_Course.ID = db_Curriculum.ID{idx};
 QE_Course.Name = db_Curriculum.Name{idx};
 QE_Course.Class = Class(6:end);
@@ -97,12 +110,12 @@ for iReq = 1:M
     Objectives = struct();
     for iObj = 1:sum(C(iReq,:))
         Objectives(iObj).Description = sprintf('请输入第%d个指标点相应的第%d个教学目标说明',iReq,iObj);
-        EvalTypes = struct();
+        EvalTypes = Def_EvalTypes;
         for iType = 1:length(Spec)
             EvalTypes(iType).Description = sprintf('请输入第%d个考核类型说明',iType);
             EvalTypes(iType).Code = sprintf('请输入第%d个考核类型的代码',iType);
             EvalTypes(iType).Weight = sprintf('请输入第%d个考核类型对第%d个教学目标的权重',iType,iObj);
-            EvalWays = struct();
+            EvalWays = Def_EvalWays;
             for iWay = 1:Spec(iType)
                 EvalWays(iWay).Description = sprintf('请输入第%d个考核类型的第%d个考核方法说明',iType,iWay);
                 EvalWays(iWay).Weight = sprintf('请输入第%d个考核方法对第%d个考核类型的权重',iWay,iType);
@@ -124,6 +137,18 @@ end
 QE_Course.Requirements = Requirements;
 QE_Course.Result = sprintf('请输入/计算课程质量');
 QE_Course.RelMatrix.Req2Obj = C;
-QE_Course.Transcript.Definition.Spec = Spec;
+% 成绩单
+Definition = Def_Definition;
+Definition.Spec = Spec;
+EvalTypes = Def_EvalTypes;
+EvalTypes(1:length(Spec)) = Def_EvalTypes;
+for iType = 1:length(Spec)
+    EvalWays = Def_EvalWays;
+    EvalWays(1:Spec(iType)) = Def_EvalWays;
+    EvalTypes(iType).EvalWays = EvalWays;
+end
+Definition.EvalTypes = EvalTypes;
+QE_Course.Definition = Definition;
+QE_Course.Detail = table;
 
 end
