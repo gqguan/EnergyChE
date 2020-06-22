@@ -157,10 +157,8 @@ QE_Course.RelMatrix.Req2Obj = C;
 %% 输入教学目标及各考核内容与教学目标间的支撑关系
 QE_Course = EA_Input(QE_Course);
 
-%% 根据教学目标与考核内容的关系矩阵（Obj2Content）构造考核方法
+%% 计算达成度
 QE_Course = EA_EvalMethod(QE_Course);
-
-%% 计算各考核方式的平均得分
 
 
 end

@@ -34,7 +34,7 @@ end
 AvgTable = array2table(mean(cell2mat(Transcript{:,Indices_SelectedCols})), ...
                        'VariableNames', VarNames(Indices_SelectedCols));
 
-%% 顺次对各指标点构造考核方法
+%% 顺次对各指标点构造考核方法并进行达成度计算
 for iReq = 1:NumReq
     Objectives = Requirements(iReq).Objectives;
     NumObj = length(Objectives);
@@ -69,6 +69,7 @@ for iReq = 1:NumReq
                 Weight_Way = Objectives(iObj).EvalTypes(iType).EvalWays(iWay).Weight;
                 Weight = Weight_Type*Weight_Way;
                 Objectives(iObj).EvalTypes(iType).EvalWays(iWay).Weight = Weight;
+                % 从成绩表中获取该项考核方式的得分
                 Credit = AvgTable.(Objectives(iObj).EvalTypes(iType).EvalWays(iWay).Code);
                 Objectives(iObj).EvalTypes(iType).EvalWays(iWay).Credit = Credit;
                 FullCredit = Objectives(iObj).EvalTypes(iType).EvalWays(iWay).FullCredit;
