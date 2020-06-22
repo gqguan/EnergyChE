@@ -134,8 +134,8 @@ for i = 1:FileNum
             C = raw(:,19);
             Overall = raw(:,20);
             StudentScore = table(Class, SN, Name, Year, Title, ...
-                                 A1, A2, A3, A4, A5, A6, ...
-                                 B1, B2, B3, B4, B5, C, Overall);
+                                 A1, A2, A3, A4, A5, ...
+                                 B1, B2, B3, B4, C, Overall);
             % 筛选能源化工专业且有成绩的学生（未完成毕设的同学成绩为NULL）的学生
             idx_ext1 = cellfun(@(c) ischar(c) && ~isempty(strfind(c, '能源化学')), Class);
             idx_ext2 = cellfun(@(c) ~ischar(c), Overall);
