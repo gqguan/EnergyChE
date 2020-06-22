@@ -43,26 +43,6 @@ else
     M = sum(db_Curriculum.ReqMatrix(idx,:)); % number of supported indicator
 end
 
-%% 调用GetData导入全部课程的成绩单
-% 导入“简单成绩单”
-db_Outcome0 = GetData({Class});
-% 导入“详细成绩单”
-db_Outcome1 = GetData({Class},1);
-% 用“详细成绩单”代替“简单成绩单”
-db_Outcome = db_Outcome0;
-for iCourse = 1:length(db_Outcome1)
-    if ~isempty(db_Outcome1(iCourse).(Class))
-        idx_RepeatedCourse = find(strcmp(db_Outcome1(iCourse).ID, [db_Outcome.ID]));
-        db_Outcome(idx_RepeatedCourse).(Class) = db_Outcome1(iCourse).(Class);
-    end
-end
-Transcript = db_Outcome(idx).(Class);
-if isempty(Transcript)
-    disp('No transcript in dataset and STOP')
-    return
-end
-
-%% Supply info in syllabus
 %  Input the number of teaching objectives
 if opt == 1
     prompt2 = sprintf('%s [直接回车输入缺省值 %d ]: ', prompt2, M);
@@ -114,6 +94,23 @@ Def_Transcript = struct('Definition', struct, ...
 % 导入成绩单说明
 Definition = ImportSpecification(0, Def_EvalWays, Def_EvalTypes);
 QE_Course.Transcript.Definition = Definition;
+
+% 调用GetData导入全部课程的成绩单
+db_Outcome0 = GetData({Class}); % 导入“简单成绩单”
+db_Outcome1 = GetData({Class},1); % 导入“详细成绩单”
+% 用“详细成绩单”代替“简单成绩单”
+db_Outcome = db_Outcome0;
+for iCourse = 1:length(db_Outcome1)
+    if ~isempty(db_Outcome1(iCourse).(Class))
+        idx_RepeatedCourse = find(strcmp(db_Outcome1(iCourse).ID, [db_Outcome.ID]));
+        db_Outcome(idx_RepeatedCourse).(Class) = db_Outcome1(iCourse).(Class);
+    end
+end
+Transcript = db_Outcome(idx).(Class);
+if isempty(Transcript)
+    disp('No transcript in dataset and STOP')
+    return
+end
 QE_Course.Transcript.Detail = Transcript;
 
 % 构造QE_Course
