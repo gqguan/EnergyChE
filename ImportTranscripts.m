@@ -14,7 +14,7 @@ if nargin == 0
 end
 
 %% Multi-select files being imported
-[FileNames, PathName] = uigetfile('*.*', 'Select files ...', 'Multiselect', 'on');
+[FileNames, PathName] = uigetfile('*.*', '选择成绩单Excel文件 ...', 'Multiselect', 'on');
 % Note:
 % When only one file is selected, uigetfile() will return the char variable
 % and lead to the error in [FullPath{:}]. Use cellstr() to ensure the
@@ -131,11 +131,11 @@ for i = 1:FileNum
             B3 = raw(:,16);
             B4 = raw(:,17);
 %             B5 = raw(:,18);
-            C = raw(:,19);
+            C1 = raw(:,19);
             Overall = raw(:,20);
             StudentScore = table(Class, SN, Name, Year, Title, ...
                                  A1, A2, A3, A4, A5, ...
-                                 B1, B2, B3, B4, C, Overall);
+                                 B1, B2, B3, B4, C1, Overall);
             % 筛选能源化工专业且有成绩的学生（未完成毕设的同学成绩为NULL）的学生
             idx_ext1 = cellfun(@(c) ischar(c) && ~isempty(strfind(c, '能源化学')), Class);
             idx_ext2 = cellfun(@(c) ~ischar(c), Overall);
