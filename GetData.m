@@ -27,9 +27,12 @@ detail = struct([]);
 BlankRecord = struct([]);
 output = struct([]);
 % Build a default table to show the completion of file imported
-if nargin < 1
-    Years = {'class2013', 'class2014', 'class2015'};
-    opt = 0;
+switch nargin
+    case 1
+        opt = 0;
+    case 0
+        Years = {'class2013', 'class2014', 'class2015'};
+        opt = 0;
 end
 % Import all transcripts if dataset is not existed
 if ~exist('dataset', 'var')
