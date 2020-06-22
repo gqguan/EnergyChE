@@ -1,4 +1,4 @@
-function [output, db_Curriculum, db_GradRequire] = GetData(Years)
+function [output, db_Curriculum, db_GradRequire] = GetData(Years, opt)
 %% 从工作空间中的dataset变量中提取指定年级的各课程全部学生成绩单
 %
 % 功能说明：
@@ -9,6 +9,8 @@ function [output, db_Curriculum, db_GradRequire] = GetData(Years)
 % 参数说明：
 % input arguments
 % Years - (str array) default as {'class2013', 'class2014', 'class2015'}
+% opt   - (integer) 0 - 缺省值，从dataset中导入成绩单
+%                   1 - 从dataset1中导入成绩单
 %
 % output arguments
 % output - (struct array) outcomes for all courses
@@ -19,7 +21,7 @@ function [output, db_Curriculum, db_GradRequire] = GetData(Years)
 
 %% Initialize
 clear detail BlankRecord;
-load('database.mat')
+load('database.mat', 'db_Curriculum', 'db_GradRequire', 'dataset', 'dataset1')
 BlankRecord_idx = 1;
 detail = struct([]);
 BlankRecord = struct([]);
@@ -27,6 +29,7 @@ output = struct([]);
 % Build a default table to show the completion of file imported
 if nargin < 1
     Years = {'class2013', 'class2014', 'class2015'};
+    opt = 0;
 end
 % Import all transcripts if dataset is not existed
 if ~exist('dataset', 'var')
@@ -41,23 +44,14 @@ for i = 1:height(db_Curriculum)
     detail(i).ID = db_Curriculum.ID(i);
     detail(i).Name = db_Curriculum.Name(i);
     detail(i).Credit = db_Curriculum.Credit(i);
-    getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.ID(i)));
+    switch opt
+        case 0
+            getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.ID(i)));
+        case 1
+            getTranscript = dataset1(strcmp({dataset1.CourseID}, db_Curriculum.ID(i)));
+    end
     if ~isempty(getTranscript)
-        % 附加教师和选课代码
-        clear Teacher CourseCode
-        Teacher(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).Teacher};
-        CourseCode(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).CourseCode};
-        AllStudents = [getTranscript(1).StudentScore, table(Teacher), table(CourseCode)];
-        % 当同一门课程有多张成绩单时，把成绩单上的学生列表合并
-        if length(getTranscript) >= 2
-            for j = 2:length(getTranscript)
-                clear Teacher CourseCode
-                Teacher(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).Teacher};
-                CourseCode(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).CourseCode};
-                AddStudents = [getTranscript(j).StudentScore, table(Teacher), table(CourseCode)];
-                AllStudents = [AllStudents; AddStudents];
-            end
-        end
+        CombineTranscript()
         % Get the categories according to year
         YearList = categories(categorical(AllStudents.Year));
         for j = 1:length(YearList)
@@ -86,19 +80,7 @@ for BlankRecord_idx = 1:length(BlankRecord)
     i = BlankRecord(BlankRecord_idx).idx;
     getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.IDv2018(i)));
     if ~isempty(getTranscript)
-        clear Teacher CourseCode
-        Teacher(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).Teacher};
-        CourseCode(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).CourseCode};
-        AllStudents = [getTranscript(1).StudentScore, table(Teacher), table(CourseCode)];
-        if length(getTranscript) >= 2
-            for j = 2:length(getTranscript)
-                clear Teacher CourseCode
-                Teacher(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).Teacher};
-                CourseCode(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).CourseCode};
-                AddStudents = [getTranscript(j).StudentScore, table(Teacher), table(CourseCode)];
-                AllStudents = [AllStudents; AddStudents];
-            end
-        end
+        CombineTranscript()
         % Get the given year
         fieldname = BlankRecord(BlankRecord_idx).class; 
         fieldname = [fieldname{:}]; year = fieldname((end-3):end);
@@ -115,4 +97,36 @@ for course_sn = 1:length(detail)
         year = Years(year_sn); year = year{:};
         output(course_sn).(year) = detail(course_sn).(year);        
     end
+end
+
+%% 添加教师和选课代码列并合并成绩单（课程“毕业设计(论文)”只合并成绩单）
+function CombineTranscript()
+    if ~strcmp(detail(i).Name{:}, '毕业设计(论文)')
+        % 附加教师和选课代码
+        clear Teacher CourseCode
+        Teacher(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).Teacher};
+        CourseCode(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).CourseCode};
+        AllStudents = [getTranscript(1).StudentScore, table(Teacher), table(CourseCode)];
+        % 当同一门课程有多张成绩单时，把成绩单上的学生列表合并
+        if length(getTranscript) >= 2
+            for j = 2:length(getTranscript)
+                clear Teacher CourseCode
+                Teacher(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).Teacher};
+                CourseCode(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).CourseCode};
+                AddStudents = [getTranscript(j).StudentScore, table(Teacher), table(CourseCode)];
+                AllStudents = [AllStudents; AddStudents];
+            end
+        end
+    else
+        AllStudents = getTranscript(1).StudentScore;
+        % 当同一门课程有多张成绩单时，把成绩单上的学生列表合并
+        if length(getTranscript) >= 2
+            for j = 2:length(getTranscript)
+                AddStudents = getTranscript(j).StudentScore;
+                AllStudents = [AllStudents; AddStudents];
+            end
+        end
+    end
+end
+
 end
