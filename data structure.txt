@@ -10,18 +10,27 @@ QE_Courses
 			EvalTypes - struct array
 				Description - char, e.g., '期末考试'
 				Code - char, e.g., 'A'
-				Weight - double, e.g., 0.25
 				EvalWays - struct array 
 					Description - char, e.g., 'X大题XX小题'
-					Weight - double, e.g., 0.05 
+					Code - char, e.g., 'A1'
+					Weight - double, e.g., 0.05 (全局修正权重）
 					FullCredit - double, e.g., 2 (分值为2)
-					Outcome - double, e.g., 0.763 (平均得分为0.763)
-					Result - double, = Outcome/FullCredit
-				Result - double, = sum(EvalWays(i).Weight*EvalWays(i).Result)
+					Credit - double, e.g., 0.763 (平均得分为0.763)
+					Result - double, = Credit/FullCredit
+					Correction - struct
+						Credit - double, = Credit*Weight
+						FullCredit - double, = FullCredit*Weight
+				Weight - double, e.g., 0.25
+				Subsum - struct
+					Credit - double, = sum(EvalWays(i).Correction.Credit)
+					FullCredit - double, = sum(EvalWays(i).Correction.FullCredit)
 			Weight - double, e.g., 1 (即1个毕业要求指标点对应1个教学目标)
-			Result - double, = sum(EvalTypes(i).Weight*EvalTypes(i).Result)
+			Sum - struct
+				Credit - double, = sum(EvalTypes(i).Subsum.Credit)
+				FullCredit - double, = sum(EvalTypes(i).Subsum.FullCredit)
+			Result - double, = Sum.Credit/Sum.FullCredit
 		Weight - double, e.g., 0.25
-		Result - double, = sum(Objectives(i).Weight*Objectives(i).Result)
+		Result - double, = sum(Objectives(i).Weight*Objectives(i).Sum)
 	Result - double, = sum(Requirements(i).Weight*Objectives(i).Result)
 	RelMatrix - struct
 		Req2Obj - double matrix(M,N)
@@ -35,6 +44,7 @@ QE_Courses
 				Weight - double, e.g., 0.7 (该评价类型的权重)
 				EvalWays - struct array 
 					Description - char, e.g., 'X大题XX小题'
+					Code - char, e.g., 'A1'
 					Weight - double, e.g., 0.05 (该评价方式的权重)
 					FullCredit - double, e.g., 2 (分值为2)
 		Detail - table

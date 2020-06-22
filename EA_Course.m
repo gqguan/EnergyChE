@@ -3,13 +3,12 @@
 % 参数说明
 % 输入参数：CourseName - char 进行课程目标达成度分析的课程名称
 %          Class      - char 进行课程目标达成度分析的课程年级
-%          Spec       - double array 考查方式定义向量
 % 输出参数：QE_Course  - struct 课程目标达成度分析结果
 %
 %  by Dr. GUAN Guoqiang @ SCUT on 2019-09-14
 %
 
-function QE_Course = EA_Course(CourseName, Class, Spec)
+function QE_Course = EA_Course(CourseName, Class)
 %% Initialize
 opt = 0; % 运行模式为安静模式
 idx = 0;
@@ -45,7 +44,18 @@ else
 end
 
 %% 调用GetData导入全部课程的成绩单
-db_Outcome = GetData({Class});
+% 导入“简单成绩单”
+db_Outcome0 = GetData({Class});
+% 导入“详细成绩单”
+db_Outcome1 = GetData({Class},1);
+% 用“详细成绩单”代替“简单成绩单”
+db_Outcome = db_Outcome0;
+for iCourse = 1:length(db_Outcome1)
+    if ~isempty(db_Outcome1(iCourse).(Class))
+        idx_RepeatedCourse = find(strcmp(db_Outcome1(iCourse).ID, [db_Outcome.ID]));
+        db_Outcome(idx_RepeatedCourse).(Class) = db_Outcome1(iCourse).(Class);
+    end
+end
 Transcript = db_Outcome(idx).(Class);
 if isempty(Transcript)
     disp('No transcript in dataset and STOP')
@@ -89,6 +99,7 @@ end
 %% 输出
 % 定义成绩单的数据结构
 Def_EvalWays = struct('Description', 'X大题XX小题', ...
+                      'Code', 'A1', ...
                       'Weight', 0.05, ...
                       'FullCredit', 2);
 Def_EvalTypes = struct('Description', '期末考试', ...
@@ -99,6 +110,12 @@ Def_Definition = struct('Spec', [5 4 1], ...
                         'EvalTypes', struct);
 Def_Transcript = struct('Definition', struct, ...
                         'Detail', table);
+
+% 导入成绩单说明
+Definition = ImportSpecification(0, Def_EvalWays, Def_EvalTypes);
+QE_Course.Transcript.Definition = Definition;
+QE_Course.Transcript.Detail = Transcript;
+
 % 构造QE_Course
 QE_Course.ID = db_Curriculum.ID{idx};
 QE_Course.Name = db_Curriculum.Name{idx};
@@ -110,24 +127,23 @@ for iReq = 1:M
     Objectives = struct();
     for iObj = 1:sum(C(iReq,:))
         Objectives(iObj).Description = sprintf('请输入第%d个指标点相应的第%d个教学目标说明',iReq,iObj);
-        EvalTypes = Def_EvalTypes;
-        for iType = 1:length(Spec)
-            EvalTypes(iType).Description = sprintf('请输入第%d个考核类型说明',iType);
-            EvalTypes(iType).Code = sprintf('请输入第%d个考核类型的代码',iType);
-            EvalTypes(iType).Weight = sprintf('请输入第%d个考核类型对第%d个教学目标的权重',iType,iObj);
-            EvalWays = Def_EvalWays;
-            for iWay = 1:Spec(iType)
-                EvalWays(iWay).Description = sprintf('请输入第%d个考核类型的第%d个考核方法说明',iType,iWay);
-                EvalWays(iWay).Weight = sprintf('请输入第%d个考核方法对第%d个考核类型的权重',iWay,iType);
-                EvalWays(iWay).FullCredit = sprintf('请输入第%d个考核方法的分值',iWay);
-                EvalWays(iWay).Outcome = sprintf('请输入/计算第%d个考核方法的得分',iWay);
+        EvalTypes = Definition.EvalTypes;
+        for iType = 1:length(QE_Course.Transcript.Definition.Spec)
+            EvalWays = Definition.EvalTypes(iType).EvalWays;
+            for iWay = 1:QE_Course.Transcript.Definition.Spec(iType)
+                EvalWays(iWay).Credit = sprintf('请输入/计算第%d个考核方法的得分',iWay);
                 EvalWays(iWay).Result = sprintf('请输入/计算第%d个考核方法的得分率',iWay);
+                EvalWays(iWay).Correction.Credit = sprintf('请输入/计算第%d个考核方法的修正得分',iWay);
+                EvalWays(iWay).Correction.FullCredit = sprintf('请输入/计算第%d个考核方法的修正分值',iWay);
             end
-            EvalTypes(iType).EvalWays = EvalWays;
-            EvalTypes(iType).Result = sprintf('请输入/计算第%d个考核类型的加权平均得分率',iType);
+            EvalTypes(iType).EvalWays = EvalWays; 
+            EvalTypes(iType).Subsum.Credit = sprintf('请输入/计算第%d个考核方法的修正得分小计（= sum(EvalWays(iWay).Correction.Credit)）',iType);
+            EvalTypes(iType).Subsum.FullCredit = sprintf('请输入/计算第%d个考核方法的修正分值小计（= sum(EvalWays(iWay).Correction.FullCredit)）',iType);
         end
         Objectives(iObj).EvalTypes = EvalTypes;
         Objectives(iObj).Weight = sprintf('请输入第%d个教学目标对第%d个指标点的权重',iObj,iReq);
+        Objectives(iObj).Sum.Credit = sprintf('请输入第%d个教学目标对第%d个指标点的合计得分（= sum(EvalTypes(iType).Subsum.Credit)）',iObj,iReq);
+        Objectives(iObj).Sum.FullCredit = sprintf('请输入第%d个教学目标对第%d个指标点的合计分值（= sum(EvalTypes(iType).Subsum.FullCredit)）',iObj,iReq);
         Objectives(iObj).Result = sprintf('请输入/计算第%d个指标点的第%d个教学目标达成度',iReq,iObj);
     end
     Requirements(iReq).Objectives = Objectives;
@@ -137,18 +153,14 @@ end
 QE_Course.Requirements = Requirements;
 QE_Course.Result = sprintf('请输入/计算课程质量');
 QE_Course.RelMatrix.Req2Obj = C;
-% 成绩单
-Definition = Def_Definition;
-Definition.Spec = Spec;
-EvalTypes = Def_EvalTypes;
-EvalTypes(1:length(Spec)) = Def_EvalTypes;
-for iType = 1:length(Spec)
-    EvalWays = Def_EvalWays;
-    EvalWays(1:Spec(iType)) = Def_EvalWays;
-    EvalTypes(iType).EvalWays = EvalWays;
-end
-Definition.EvalTypes = EvalTypes;
-QE_Course.Definition = Definition;
-QE_Course.Detail = table;
+
+%% 输入教学目标及各考核内容与教学目标间的支撑关系
+QE_Course = EA_Input(QE_Course);
+
+%% 根据教学目标与考核内容的关系矩阵（Obj2Content）构造考核方法
+QE_Course = EA_EvalMethod(QE_Course);
+
+%% 计算各考核方式的平均得分
+
 
 end
