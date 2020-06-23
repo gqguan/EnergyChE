@@ -150,6 +150,7 @@ end
 QE_Course.Requirements = Requirements;
 QE_Course.Result = sprintf('请输入/计算课程质量');
 QE_Course.RelMatrix.Req2Obj = C;
+QE_Course.Analysis = sprintf('课程：%d-达成度分析（示例）',CourseName);
 
 %% 输入教学目标及各考核内容与教学目标间的支撑关系
 QE_Course = EA_Input(QE_Course);
