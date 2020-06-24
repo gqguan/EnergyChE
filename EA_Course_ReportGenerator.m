@@ -205,7 +205,7 @@ for iCourse=1:length(QE_Courses)
     r = TableRow;
     te = TableEntry('达成度结果');
     append(r,te);
-    p = Paragraph(num2str(round(QE_Courses.Result,4,'significant')));
+    p = Paragraph(num2str(round(QE_Courses(iCourse).Result,4,'significant')));
     p.Style = [p.Style mainHeaderTextStyle {HAlign('right')}];
     te = TableEntry(p);
     te.ColSpan = 8;
@@ -216,7 +216,7 @@ for iCourse=1:length(QE_Courses)
     r = TableRow;
     te = TableEntry('达成度分析');
     append(r,te);
-    te = TableEntry(QE_Courses.Analysis);
+    te = TableEntry(QE_Courses(iCourse).Analysis);
     te.ColSpan = 8;
     append(r,te);
     append(t,r);   
