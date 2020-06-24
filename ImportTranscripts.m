@@ -1,5 +1,10 @@
 function [dataset, FileNum] = ImportTranscripts(opt)
 %% Import data from selected spreadsheets
+%
+% 参数说明：
+% 输入参数 opt - 0 （缺省值）导入老版教务系统导出的成绩单
+%               1 导入毕业设计(论文)的成绩单
+%               2 先导入“成绩单定义”，再据其导入相应的成绩单
 %  
 %  1) Selected all spreadsheets needed to be imported
 %  2) Convert data in each spreadsheet into a table
@@ -145,6 +150,64 @@ for i = 1:FileNum
             Course = '毕业设计（论文）';
             CourseCode = '';
             Teacher = '';
+        case 2
+            AcadYear = '';
+            CourseCode = '';
+            CourseID = '';
+            Course = '';
+            Teacher = '';
+            % 导入成绩单定义
+            EA_Definition
+            Definition = ImportSpecification(0, Def_EvalTypes, Def_EvalWays);
+            Spec = Definition.Spec; % 成绩单结构向量
+            % 从成绩单定义中获取成绩单的数据列
+            DefHeads = cell(1,sum(Spec));
+            iName = 1;
+            for iType = 1:length(Spec)
+                for iWay = 1:Spec(iType)
+                    DefHeads{iName} = Definition.EvalTypes(iType).EvalWays(iWay).Code;
+                    iName = iName+1;
+                end
+            end
+            % 从导入的成绩单中获取列名称向量
+            headTitles = raw(1,:);
+            raw(1,:) = [];
+            % 从导入成绩单的列名中查找班级列
+            iCols_Class = strcmp('班级', headTitles)|strcmpi('class', headTitles);
+            StudentScore.Class = raw(:,iCols_Class);
+            % 从导入成绩单的列名中查找学生姓名
+            iCols_Name = strcmp('姓名', headTitles)|strcmpi('Name', headTitles);
+            StudentScore.Name = raw(:,iCols_Name);
+            % 从导入成绩单的列名中查找学号
+            iCols_SN = strcmp('学号', headTitles)|strcmpi('SN', headTitles);
+            StudentScore.SN = raw(:,iCols_SN);
+            % 从导入成绩单的列名中按成绩单定义查找成绩数据
+            iCols_Data = false(1,length(headTitles));
+            for iHead = 1:sum(Spec)
+                iCols_Data = iCols_Data|strcmp(DefHeads(iHead), headTitles);
+            end
+            ScoreData = cell2table(raw(:,iCols_Data), 'VariableNames', DefHeads);
+            StudentScore = [struct2table(StudentScore),ScoreData];
+            % 从导入成绩单的文件名获取课程名称（通过文件名中的识别符“-”、“_”或空格）
+            startIdx = regexp(FileNames{i},'[-_\s]', 'once');
+            if ~isempty(startIdx)
+                tryCourseName = FileNames{i}(1:(startIdx-1));
+                load('database.mat', 'db_Curriculum')
+                FoundIdx = strncmp(tryCourseName, db_Curriculum.Name, length(tryCourseName));
+                if any(FoundIdx)
+                    Course = db_Curriculum.Name{FoundIdx};
+                    CourseID = db_Curriculum.ID{FoundIdx};
+                    % 年级
+                    Class = FileNames{i}((startIdx+1):(startIdx+4));
+                    % 课程执行的学期
+                    if isnumeric(db_Curriculum.Semester(FoundIdx))
+                        AcadYear_Num = str2double(Class)+round(db_Curriculum.Semester(FoundIdx)/2);
+                        AcadYear = [num2str(AcadYear_Num-1),'-',num2str(AcadYear_Num)];
+                    end
+                end
+            else
+                disp('无法从成绩单文件名中获取课程名称信息！2013级成绩单的文件名示例：毕业设计(论文)_2013.xlsx')
+            end
     end
             
     % Build the data set
