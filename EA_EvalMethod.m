@@ -31,9 +31,15 @@ for iWayCode = 1:length(WayCodes)
     Indices_SelectedCols = Indices_SelectedCols|Indices_CurrentCols;
 end
 % 计算平均值
-AvgTable = array2table(mean(cell2mat(Transcript{:,Indices_SelectedCols})), ...
-                       'VariableNames', VarNames(Indices_SelectedCols));
-
+Scores = Transcript{:,Indices_SelectedCols};
+switch class(Scores)
+    case('cell')
+        AvgTable = array2table(mean(cell2mat(Scores)), ...
+                               'VariableNames', VarNames(Indices_SelectedCols));
+    case('double')
+        AvgTable = array2table(mean(Scores), ...
+                               'VariableNames', VarNames(Indices_SelectedCols));
+end
 %% 顺次对各指标点构造考核方法并进行达成度计算
 for iReq = 1:NumReq
     Objectives = Requirements(iReq).Objectives;
