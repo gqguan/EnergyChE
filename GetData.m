@@ -98,7 +98,11 @@ for course_sn = 1:length(detail)
     output(course_sn).Credit = detail(course_sn).Credit;
     for year_sn = 1:length(Years)
         year = Years(year_sn); year = year{:};
-        output(course_sn).(year) = detail(course_sn).(year);        
+        if any(strcmp(year, fieldnames(detail)))
+            output(course_sn).(year) = detail(course_sn).(year); 
+        else
+            fprintf('[Error] 找不到%s级课程“%s”数据!\n', year(6:9), detail(course_sn).Name{:})
+        end
     end
 end
 

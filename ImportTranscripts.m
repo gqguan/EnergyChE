@@ -181,6 +181,8 @@ for i = 1:FileNum
             % 从导入成绩单的列名中查找学号
             iCols_SN = strcmp('学号', headTitles)|strcmpi('SN', headTitles);
             StudentScore.SN = raw(:,iCols_SN);
+            % 从每个同学学号的前4位
+            StudentScore.Year = cellfun(@(x) x(1:4), raw(:,iCols_SN), 'UniformOutput', false);
             % 从导入成绩单的列名中按成绩单定义查找成绩数据
             iCols_Data = false(1,length(headTitles));
             for iHead = 1:sum(Spec)
