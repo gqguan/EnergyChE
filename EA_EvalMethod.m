@@ -97,5 +97,6 @@ for iReq = 1:NumReq
 end
 QE_Course.Requirements = Requirements;
 QE_Course.Result = dot(cell2mat({Requirements.Weight}),cell2mat({Requirements.Result}));
+QE_Course.Analysis = EA_TextMaker(QE_Course);
 
 end

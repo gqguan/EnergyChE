@@ -150,7 +150,7 @@ end
 QE_Course.Requirements = Requirements;
 QE_Course.Result = sprintf('请输入/计算课程质量');
 QE_Course.RelMatrix.Req2Obj = C;
-QE_Course.Analysis = sprintf('课程：%d-达成度分析（示例）',CourseName);
+QE_Course.Analysis = sprintf('课程：%s-达成度分析（示例）',CourseName);
 
 %% 输入教学目标及各考核内容与教学目标间的支撑关系
 QE_Course = EA_Input(QE_Course);
@@ -158,5 +158,18 @@ QE_Course = EA_Input(QE_Course);
 %% 计算达成度
 QE_Course = EA_EvalMethod(QE_Course);
 
+%% 保存结果
+% 从QE_Courses.mat中载入QE_Courses变量
+load('QE_Courses.mat','QE_Courses')
+% 检查当前进行达成度计算的课程是否存在
+IDFound = strcmp(QE_Course.ID, {QE_Courses.ID});
+ClassAlsoFound = strcmp(QE_Course.Class, {QE_Courses(IDFound).Class});
+if sum(ClassAlsoFound) ~= 0
+    disp('Data are existed and manually fix')
+else
+    QE_Courses = [QE_Courses QE_Course];
+    disp('Save into QE_Courses.')
+    save('QE_Courses.mat', QE_Courses)
+end
 
 end
