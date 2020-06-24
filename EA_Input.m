@@ -20,7 +20,7 @@ ColWidth = cell(1,NumWay+2);
 
 FigPosX = 100;
 FigPosY = 100;
-FigWidth = 1000;
+FigWidth = 1200;
 FigHeight = 300;
 TabMargin = 25;
 
