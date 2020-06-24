@@ -158,7 +158,7 @@ if sum(ClassAlsoFound) ~= 0
 else
     QE_Courses = [QE_Courses QE_Course];
     disp('Save into QE_Courses.')
-    save('QE_Courses.mat', QE_Courses)
+    save('QE_Courses.mat', 'QE_Courses', '-append')
 end
 
 end
