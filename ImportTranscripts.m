@@ -47,83 +47,56 @@ for i = 1:FileNum
     switch opt
         case(0)
             GetCourseInfo(1)
-            cellVectors = raw(:,[1,2,3,4,5,6,7,8,9]);
-            % Allocate imported array to column variable names
-            VarName1 = cellVectors(:,1);
-            VarName2 = cellVectors(:,2);
-            VarName3 = cellVectors(:,3);
-            VarName4 = cellVectors(:,4);
-            VarName5 = cellVectors(:,5);
-            VarName6 = cellVectors(:,6);
-            VarName7 = cellVectors(:,7);
-            VarName8 = cellVectors(:,8);
-            VarName9 = cellVectors(:,9);
-
-            % Get the data info according to the series number in VarName1
-            idx = ~isnan(str2double(VarName1)); % indices of number
+            raw = raw(5:end,:);
+            raw_Width = size(raw,2);
+            IdxCol = raw(:,1); % 序号索引列
+            % 从“序号索引列”中提取数值序号
+            idx = ~isnan(str2double(IdxCol));
+            % 该成绩单的学生人数
             NumStudent = sum(idx);
-            % Initialize
-            j = 1;
-            Class = cell(NumStudent, 1);
-            SN = cell(NumStudent, 1);
-            Name = cell(NumStudent, 1);
-            RegGrade = zeros(size(Class));
-            MidExam = zeros(size(Class));
-            FinalExam = zeros(size(Class));
-            ExpGrade = zeros(size(Class));
-            Overall = zeros(size(Class));
-            % Change scale from 5 points to 100 points
-            VarName4 = ConvertScale(VarName4);
-            VarName5 = ConvertScale(VarName5);
-            VarName6 = ConvertScale(VarName6);
-            VarName7 = ConvertScale(VarName7);
-            VarName8 = ConvertScale(VarName8);
-            % Import data row by row
-            for row = 6:length(idx)
-                if idx(row) == 0
-                    ClassName = VarName1(row);
+            rawdata = cell(NumStudent,raw_Width); 
+            rawdata(1,:) = raw(1,:);
+            % 增加一列存放学生班级 
+            rawdata(1,end+1) = {'班级'};
+            iStudent = 1;
+            for iRow = 2:length(IdxCol)
+                if idx(iRow) == 0
+                    ClassName = raw{iRow,1}; % 班级名称
                 else
-                    Class(j) = ClassName;
-                    SN(j) = VarName2(row);
-                    Name(j) = VarName3(row);
-                    RegGrade(j) = str2double(VarName4(row));
-                    MidExam(j) = str2double(VarName5(row));
-                    FinalExam(j) = str2double(VarName6(row));
-                    ExpGrade(j) = str2double(VarName7(row));
-                    Overall(j) = str2double(VarName8(row));
-                    j = j+1;
+                    iStudent = iStudent+1;
+                    rawdata(iStudent,1:raw_Width) = raw(iRow,:);
+                    rawdata(iStudent,end) = {ClassName};
                 end
             end
-            Year = cellfun(@(x) x(1:4), SN, 'UniformOutput', false);
-            % Extract the students of EnergyChE
-            idx_ext = cellfun(@(c) ischar(c) && ~isempty(strfind(c, '能源化学')), Class);
-            % Extract the students' info
-            Class = Class(idx_ext);
-            SN = SN(idx_ext);
-            Year = Year(idx_ext);
-            Name = Name(idx_ext);
-            RegGrade = RegGrade(idx_ext);
-            MidExam = MidExam(idx_ext);
-            FinalExam = FinalExam(idx_ext);
-            ExpGrade = ExpGrade(idx_ext);
-            Overall = Overall(idx_ext);
-            % Build the data table
-            StudentScore = table(Class, SN, Name, Year, RegGrade, MidExam, FinalExam, ExpGrade, Overall);
+
+            % 筛选能源化工专业的学生
+            idx_ext = cellfun(@(c) ischar(c) && contains(c, '能源化学'), rawdata(:,end));
+            FirstRow = rawdata(1,:); % 各列的标题行
+            rawdata = rawdata(idx_ext,:);
+            % 从学号获取年级
+            Year = cellfun(@(x) x(1:4), rawdata(1:end,2), 'UniformOutput', false);
+            % 增加一列存放“年级”
+            rawdata(:,end+1) = Year;
+            FirstRow = [FirstRow {'年级'}];
+            
+            raw = [FirstRow; rawdata];
             Definition = ImportSpecification('简单成绩单定义1.xlsx');
+            % 获取课程成绩
+            StudentScore = GetTranscript();
         case 1  
             % 获取课程信息
             GetCourseInfo(2);
             % 导入成绩单定义
             Definition = ImportSpecification(FileNames(i));
             % 获取课程成绩
-            GetTranscript();
+            StudentScore = GetTranscript();
         case 2
             % 获取课程信息
             GetCourseInfo(2);
             % 导入成绩单定义
             Definition = ImportSpecification();
             % 获取课程成绩
-            GetTranscript();
+            StudentScore = GetTranscript();
     end
             
     % Build the data set
@@ -180,7 +153,7 @@ function GetCourseInfo(flag)
     end
 end
 
-function GetTranscript()
+function Detail = GetTranscript()
     % 成绩单结构向量
     Spec = Definition.Spec; 
     % 从成绩单定义中获取成绩单的数据代码列
@@ -204,23 +177,26 @@ function GetTranscript()
     end
     % 从导入成绩单的列名中查找班级列
     iCols_Class = contains(headTitles,'班级')|contains(headTitles,'Class');
-    StudentScore.Class = raw(:,iCols_Class);
+    Detail.Class = raw(:,iCols_Class);
     % 从导入成绩单的列名中查找学生姓名
     iCols_Name = contains(headTitles,'学生姓名')|contains(headTitles,'Student');
-    StudentScore.Name = raw(:,iCols_Name);
+    if ~any(iCols_Name)
+        iCols_Name = contains(headTitles,'姓名')|contains(headTitles,'Name');
+    end
+    Detail.Name = raw(:,iCols_Name);
     % 从导入成绩单的列名中查找学号
     iCols_SN = contains(headTitles,'学号')|contains(headTitles,'SN');
-    StudentScore.SN = raw(:,iCols_SN);
+    Detail.SN = raw(:,iCols_SN);
     % 从每个同学学号的前4位
-    StudentScore.Year = cellfun(@(x) x(1:4), raw(:,iCols_SN), 'UniformOutput', false);
+    Detail.Year = cellfun(@(x) x(1:4), raw(:,iCols_SN), 'UniformOutput', false);
     % 若有题目和指导教师列也将其导入
     iCols_Title = contains(headTitles,'课题')|contains(headTitles,'Title');
     if any(iCols_Title)
-        StudentScore.Title = raw(:,iCols_Title);
+        Detail.Title = raw(:,iCols_Title);
     end
     iCols_Supervisor = contains(headTitles,'教师姓名')|contains(headTitles,'Supervisor');
     if any(iCols_Supervisor)
-        StudentScore.Supervisor = raw(:,iCols_Supervisor);
+        Detail.Supervisor = raw(:,iCols_Supervisor);
     end
     % 从导入成绩单的列名中按成绩单定义查找成绩数据
     iCols_Data = false(1,length(headTitles));
@@ -230,16 +206,15 @@ function GetTranscript()
     if ~any(iCols_Data)
         % 通过考核方式代号查找成绩单的数据列
         for iHead = 1:sum(Spec)
-            iCols_Data = iCols_Data|strcmp(DefHeadCodes(iHead), headTitle);
+            iCols_Data = iCols_Data|strcmp(DefHeadCodes(iHead), headTitles);
         end
         if ~any(iCols_Data)
             disp('【错误】成绩单与定义不匹配！')
-            close(wb_gui)
             return
         end
     end
     ScoreData = cell2table(raw(:,iCols_Data), 'VariableNames', DefHeadCodes);
-    StudentScore = [struct2table(StudentScore),ScoreData];
+    Detail = [struct2table(Detail),ScoreData];
 end
 
 end
