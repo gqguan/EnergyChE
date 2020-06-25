@@ -3,7 +3,7 @@ function [dataset, FileNum] = ImportTranscripts(opt)
 %
 % 参数说明：
 % 输入参数 opt - 0 （缺省值）导入老版教务系统导出的成绩单
-%               1 导入毕业设计(论文)的成绩单
+%               1 根据成绩单从缺省位置寻找成绩单定义
 %               2 先导入“成绩单定义”，再据其导入相应的成绩单
 %  
 %  1) Selected all spreadsheets needed to be imported
@@ -117,39 +117,9 @@ for i = 1:FileNum
             AcadYear = CourseCode(7:15); % e.g. '2013-2014'
             % 提取“选课代码”
             CourseCode = CourseCode(6:end);
-        case(1) % 毕业设计（论文）成绩单 
-            headTitles = raw(1,:);
-            raw(1,:) = [];
-            Class = raw(:,4);
-            SN = raw(:,5);
-            Name = raw(:,6);
-            Year = cellfun(@(x) x(1:4), SN, 'UniformOutput', false);
-            Title = raw(:,7);
-            A1 = raw(:,8);
-            A2 = raw(:,9);
-            A3 = raw(:,10);
-            A4 = raw(:,11);
-            A5 = raw(:,12);
-%             A6 = raw(:,13);
-            B1 = raw(:,14);
-            B2 = raw(:,15);
-            B3 = raw(:,16);
-            B4 = raw(:,17);
-%             B5 = raw(:,18);
-            C1 = raw(:,19);
-            Overall = raw(:,20);
-            StudentScore = table(Class, SN, Name, Year, Title, ...
-                                 A1, A2, A3, A4, A5, ...
-                                 B1, B2, B3, B4, C1, Overall);
-            % 筛选能源化工专业且有成绩的学生（未完成毕设的同学成绩为NULL）的学生
-            idx_ext1 = cellfun(@(c) ischar(c) && ~isempty(strfind(c, '能源化学')), Class);
-            idx_ext2 = cellfun(@(c) ~ischar(c), Overall);
-            StudentScore = StudentScore(idx_ext1&idx_ext2,:);
-            AcadYear = '';
-            CourseID = '137059';
-            Course = '毕业设计（论文）';
-            CourseCode = '';
-            Teacher = '';
+            Definition = ImportSpecification('简单成绩单定义1.xlsx');
+        case 1  
+            
         case 2
             AcadYear = '';
             CourseCode = '';
@@ -157,11 +127,11 @@ for i = 1:FileNum
             Course = '';
             Teacher = '';
             % 导入成绩单定义
-            EA_Definition
-            Definition = ImportSpecification(0, Def_EvalTypes, Def_EvalWays);
+            Definition = ImportSpecification();
             Spec = Definition.Spec; % 成绩单结构向量
             % 从成绩单定义中获取成绩单的数据代码列
             DefHeadCodes = cell(1,sum(Spec));
+            DefHeadNames = cell(1,sum(Spec));
             iName = 1;
             for iType = 1:length(Spec)
                 for iWay = 1:Spec(iType)
@@ -243,10 +213,11 @@ for i = 1:FileNum
     dataset(i).Course = Course;
     dataset(i).CourseCode = CourseCode;
     dataset(i).Teacher = Teacher;
+    dataset(i).Definition = Definition;
     dataset(i).StudentScore = StudentScore;
     % Feedback the progress of file import
-    filename = FileNames(i);
-    prompt = sprintf('%s imported ...', filename{:});
+%     filename = FileNames(i);
+    prompt = sprintf('已导入%s年课程“%s”（%s）', AcadYear, Course, Teacher);
     waitbar(i/FileNum, wb_gui, prompt)
 end
 close(wb_gui)
