@@ -160,35 +160,60 @@ for i = 1:FileNum
             EA_Definition
             Definition = ImportSpecification(0, Def_EvalTypes, Def_EvalWays);
             Spec = Definition.Spec; % 成绩单结构向量
-            % 从成绩单定义中获取成绩单的数据列
-            DefHeads = cell(1,sum(Spec));
+            % 从成绩单定义中获取成绩单的数据代码列
+            DefHeadCodes = cell(1,sum(Spec));
             iName = 1;
             for iType = 1:length(Spec)
                 for iWay = 1:Spec(iType)
-                    DefHeads{iName} = Definition.EvalTypes(iType).EvalWays(iWay).Code;
+                    DefHeadCodes{iName} = Definition.EvalTypes(iType).EvalWays(iWay).Code;
+                    DefHeadNames{iName} = Definition.EvalTypes(iType).EvalWays(iWay).Description;
                     iName = iName+1;
                 end
             end
             % 从导入的成绩单中获取列名称向量
             headTitles = raw(1,:);
             raw(1,:) = [];
+            % 为成绩单列名称分配数据代码
+            headTitleCodes = cell(size(headTitles));
+            for iName = 1:length(DefHeadNames)
+                headTitleCodes(contains(headTitles, DefHeadNames{iName})) = DefHeadCodes(iName);
+            end
             % 从导入成绩单的列名中查找班级列
-            iCols_Class = strcmp('班级', headTitles)|strcmpi('class', headTitles);
+            iCols_Class = contains(headTitles,'班级')|contains(headTitles,'Class');
             StudentScore.Class = raw(:,iCols_Class);
             % 从导入成绩单的列名中查找学生姓名
-            iCols_Name = strcmp('姓名', headTitles)|strcmpi('Name', headTitles);
+            iCols_Name = contains(headTitles,'学生姓名')|contains(headTitles,'Student');
             StudentScore.Name = raw(:,iCols_Name);
             % 从导入成绩单的列名中查找学号
-            iCols_SN = strcmp('学号', headTitles)|strcmpi('SN', headTitles);
+            iCols_SN = contains(headTitles,'学号')|contains(headTitles,'SN');
             StudentScore.SN = raw(:,iCols_SN);
             % 从每个同学学号的前4位
             StudentScore.Year = cellfun(@(x) x(1:4), raw(:,iCols_SN), 'UniformOutput', false);
+            % 若有题目和指导教师列也将其导入
+            iCols_Title = contains(headTitles,'课题')|contains(headTitles,'Title');
+            if any(iCols_Title)
+                StudentScore.Title = raw(:,iCols_Title);
+            end
+            iCols_Supervisor = contains(headTitles,'教师姓名')|contains(headTitles,'Supervisor');
+            if any(iCols_Supervisor)
+                StudentScore.Supervisor = raw(:,iCols_Supervisor);
+            end
             % 从导入成绩单的列名中按成绩单定义查找成绩数据
             iCols_Data = false(1,length(headTitles));
             for iHead = 1:sum(Spec)
-                iCols_Data = iCols_Data|strcmp(DefHeads(iHead), headTitles);
+                iCols_Data = iCols_Data|strcmp(DefHeadCodes(iHead), headTitleCodes);
             end
-            ScoreData = cell2table(raw(:,iCols_Data), 'VariableNames', DefHeads);
+            if ~any(iCols_Data)
+                % 通过考核方式代号查找成绩单的数据列
+                for iHead = 1:sum(Spec)
+                    iCols_Data = iCols_Data|strcmp(DefHeadCodes(iHead), headTitle);
+                end
+                if ~any(iCols_Data)
+                    disp('【错误】成绩单与定义不匹配！')
+                    return
+                end
+            end
+            ScoreData = cell2table(raw(:,iCols_Data), 'VariableNames', DefHeadCodes);
             StudentScore = [struct2table(StudentScore),ScoreData];
             % 从导入成绩单的文件名获取课程名称（通过文件名中的识别符“-”、“_”或空格）
             startIdx = regexp(FileNames{i},'[-_\s]', 'once');
