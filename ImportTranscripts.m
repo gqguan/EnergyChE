@@ -49,35 +49,37 @@ for i = 1:FileNum
             GetCourseInfo(1)
             raw = raw(5:end,:);
             raw_Width = size(raw,2);
+            FirstRow = cell(1,raw_Width);
             IdxCol = raw(:,1); % 序号索引列
             % 从“序号索引列”中提取数值序号
             idx = ~isnan(str2double(IdxCol));
             % 该成绩单的学生人数
             NumStudent = sum(idx);
-            rawdata = cell(NumStudent,raw_Width); 
-            rawdata(1,:) = raw(1,:);
-            % 增加一列存放学生班级 
-            rawdata(1,end+1) = {'班级'};
+            rawdata = cell(NumStudent,raw_Width+2); 
+            FirstRow(1,:) = raw(1,:);
+            % 增加一列存放学生班级
+            FirstRow = [FirstRow,{'班级'},{'年级'}];
+
             iStudent = 1;
-            for iRow = 2:length(IdxCol)
+            for iRow = 1:length(IdxCol)
                 if idx(iRow) == 0
                     ClassName = raw{iRow,1}; % 班级名称
                 else
                     iStudent = iStudent+1;
                     rawdata(iStudent,1:raw_Width) = raw(iRow,:);
-                    rawdata(iStudent,end) = {ClassName};
+                    rawdata(iStudent,raw_Width+1) = {ClassName};
+                    rawdata(iStudent,raw_Width+2) = {raw{iRow,2}(1:4)};
                 end
             end
 
-            % 筛选能源化工专业的学生
-            idx_ext = cellfun(@(c) ischar(c) && contains(c, '能源化学'), rawdata(:,end));
-            FirstRow = rawdata(1,:); % 各列的标题行
-            rawdata = rawdata(idx_ext,:);
-            % 从学号获取年级
-            Year = cellfun(@(x) x(1:4), rawdata(1:end,2), 'UniformOutput', false);
-            % 增加一列存放“年级”
-            rawdata(:,end+1) = Year;
-            FirstRow = [FirstRow {'年级'}];
+%             % 筛选能源化工专业的学生
+%             idx_ext = cellfun(@(c) ischar(c) && contains(c, '能源化学'), rawdata(:,end));
+%             FirstRow = rawdata(1,:); % 各列的标题行
+%             rawdata = rawdata(idx_ext,:);
+%             % 从学号获取年级
+%             Year = cellfun(@(x) x(1:4), rawdata(1:end,2), 'UniformOutput', false);
+%             % 增加一列存放“年级”
+%             rawdata = [rawdata,Year];
             
             raw = [FirstRow; rawdata];
             Definition = ImportSpecification('简单成绩单定义1.xlsx');
@@ -178,6 +180,10 @@ function Detail = GetTranscript()
     % 从导入成绩单的列名中查找班级列
     iCols_Class = contains(headTitles,'班级')|contains(headTitles,'Class');
     Detail.Class = raw(:,iCols_Class);
+    % 筛选能源化工专业的学生
+    idx_ext = cellfun(@(c) ischar(c) && contains(c, '能源化学'), Detail.Class);
+    Detail.Class = Detail.Class(idx_ext);
+    raw = raw(idx_ext,:);
     % 从导入成绩单的列名中查找学生姓名
     iCols_Name = contains(headTitles,'学生姓名')|contains(headTitles,'Student');
     if ~any(iCols_Name)
