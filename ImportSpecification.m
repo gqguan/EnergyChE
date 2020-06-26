@@ -25,7 +25,7 @@ FullPath = strcat(PathName, FileName);
 if exist(FullPath{:}, 'file') ~= 2
     % 尝试将文件扩展名修改为xlsx
     if FullPath{:}(end-2:end) == 'xls'
-        FullPath = {[FullPath{:}(1:end-3),'.xlsx']};
+        FullPath = {[FullPath{:}(1:end-3),'xlsx']};
         if exist(FullPath{:}, 'file') ~= 2
             disp('【错误】缺省位置找不到相应的成绩单定义')
             return
