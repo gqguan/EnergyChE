@@ -32,6 +32,8 @@ QE_Courses
 		Weight - double, e.g., 0.25
 		Result - double, = sum(Objectives(i).Weight*Objectives(i).Sum)
 	Result - double, = sum(Requirements(i).Weight*Objectives(i).Result)
+	Analysis - char, e.g., '达成度分析文本（示例)'
+	Output - cell 
 	RelMatrix - struct
 		Req2Obj - double matrix(M,N)
 		Obj2Content - double matrix(N,sum(WayDefs))

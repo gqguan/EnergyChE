@@ -32,21 +32,26 @@ for iWayCode = 1:length(WayCodes)
 end
 % 计算平均值
 Scores = Transcript{:,Indices_SelectedCols};
-switch class(Scores)
-    case('cell')
-        AvgTable = array2table(mean(cell2mat(Scores)), ...
-                               'VariableNames', VarNames(Indices_SelectedCols));
-    case('double')
-        AvgTable = array2table(mean(Scores), ...
-                               'VariableNames', VarNames(Indices_SelectedCols));
+if iscell(Scores)
+    switch class(Scores{1,1})
+        case('char')
+    %         AvgTable = array2table(mean(cell2mat(Scores)), ...
+    %                                'VariableNames', VarNames(Indices_SelectedCols));
+            Scores = cellfun(@(x) str2double(x), Scores);
+        case('double')      
+    end
 end
+AvgTable = array2table(mean(Scores), 'VariableNames', VarNames(Indices_SelectedCols));
 %% 顺次对各指标点构造考核方法并进行达成度计算
+% 按成绩单定义和关系矩阵Obj2Content构造数据结构
+NRow = 1;
+tdata = {};
 for iReq = 1:NumReq
+    tdata{NRow,1} = Requirements(iReq).Description;
     Objectives = Requirements(iReq).Objectives;
     NumObj = length(Objectives);
-    Sum_Credit = zeros(1,NumObj);
-    Sum_FullCredit = zeros(1,NumObj);
     for iObj = 1:NumObj
+        tdata{NRow,2} = Objectives(iObj).Description;
         EvalTypes = Objectives(iObj).EvalTypes;           
         % 获得该教学目标的考核方式代码
         Indices = Obj2Content(iReq,:);
@@ -65,11 +70,8 @@ for iReq = 1:NumReq
         EvalTypes(Indices_DeleteType) = [];
         Objectives(iObj).EvalTypes = EvalTypes;
         % 修正各考核方式的权重值
-        Subsum_Credit = zeros(1,length(EvalTypes));
-        Subsum_FullCredit = zeros(1,length(EvalTypes));
         for iType = 1:length(EvalTypes)
-            CorrectCredit = zeros(1,length(EvalTypes(iType).EvalWays));
-            CorrectFullCredit = zeros(1,length(EvalTypes(iType).EvalWays));
+            tdata{NRow,3} = EvalTypes(iType).Description;
             Weight_Type = Objectives(iObj).EvalTypes(iType).Weight;
             for iWay = 1:length(EvalTypes(iType).EvalWays)
                 Weight_Way = Objectives(iObj).EvalTypes(iType).EvalWays(iWay).Weight;
@@ -80,29 +82,64 @@ for iReq = 1:NumReq
                 Objectives(iObj).EvalTypes(iType).EvalWays(iWay).Credit = Credit;
                 FullCredit = Objectives(iObj).EvalTypes(iType).EvalWays(iWay).FullCredit;
                 Objectives(iObj).EvalTypes(iType).EvalWays(iWay).Result = Credit/FullCredit;
-                CorrectCredit(iWay) = Credit*Weight;
-                Objectives(iObj).EvalTypes(iType).EvalWays(iWay).Correction.Credit = Credit*Weight;
-                CorrectFullCredit(iWay) = FullCredit*Weight;
-                Objectives(iObj).EvalTypes(iType).EvalWays(iWay).Correction.FullCredit = FullCredit*Weight;
+                tdata{NRow,4} = EvalTypes(iType).EvalWays(iWay).Description;
+                tdata{NRow,5} = Weight;
+                tdata{NRow,6} = Credit;
+                tdata{NRow,7} = FullCredit;
+                tdata{NRow,8} = Credit/FullCredit;
+                NRow = NRow+1;
             end
-            Subsum_Credit(iType) = sum(CorrectCredit);
-            Objectives(iObj).EvalTypes(iType).Subsum.Credit = sum(CorrectCredit);
-            Subsum_FullCredit(iType) = sum(CorrectFullCredit);
-            Objectives(iObj).EvalTypes(iType).Subsum.FullCredit = sum(CorrectFullCredit);
         end
         Objectives(iObj).Weight = 1; % 一个教学目标对应于一个毕业要求指标点
-        Sum_Credit(iObj) = sum(Subsum_Credit);
-        Objectives(iObj).Sum.Credit = sum(Subsum_Credit);
-        Sum_FullCredit(iObj) = sum(Subsum_FullCredit);
-        Objectives(iObj).Sum.FullCredit = sum(Subsum_FullCredit);
-        Objectives(iObj).Result = Objectives(iObj).Sum.Credit/Objectives(iObj).Sum.FullCredit;
     end
     Requirements(iReq).Objectives = Objectives;
-    Requirements(iReq).Weight = sum(Sum_FullCredit)/100;
-    Requirements(iReq).Result = sum(Sum_Credit)/sum(Sum_FullCredit);
+end
+% 修正各评价方式的分值
+CorrectedFullCredit = sum(cell2mat(tdata(:,5)))*cell2mat(tdata(:,5))*100;
+tdata(:,9) = num2cell(CorrectedFullCredit);
+tdata(:,10) = num2cell(CorrectedFullCredit.*cell2mat(tdata(:,8)));
+% 计算各指标点的达成度
+RowIdx = tdata(:,1); % 指标点所在列
+NumRow = length(RowIdx);
+RowIdx = find(cellfun(@(x) ischar(x), RowIdx));
+RowIdx = [RowIdx;NumRow];
+for iRow = 1:(length(RowIdx)-1)
+    if RowIdx(iRow) == RowIdx(iRow+1)
+        SpanIdx = RowIdx(iRow);
+    else
+        SpanIdx = RowIdx(iRow):(RowIdx(iRow+1)-1);
+    end
+    Requirements(iRow).Result = sum(cell2mat(tdata(SpanIdx,10))) ...
+                                /sum(cell2mat(tdata(SpanIdx,9)));
+    tdata(RowIdx(iRow),11) = {Requirements(iRow).Result};
+end
+
+%% 输出
+% 各评价方式的修正分值和得分
+iRow = 1;
+for iReq = 1:NumReq
+    Objectives = Requirements(iReq).Objectives;
+    NumObj = length(Objectives);
+    for iObj = 1:NumObj
+        EvalTypes = Objectives(iObj).EvalTypes;
+        NumType = length(EvalTypes);
+        for iType = 1:NumType
+            EvalWays = EvalTypes(iType).EvalWays;
+            NumWay = length(EvalWays);
+            for iWay = 1:NumWay
+                EvalWays(iWay).Correction.FullCredit = tdata{iRow,9};
+                EvalWays(iWay).Correction.Credit = tdata{iRow,10};
+                iRow = iRow+1;
+            end
+            EvalTypes(iType).EvalWays = EvalWays;
+        end
+        Objectives(iObj).EvalTypes = EvalTypes;
+    end
+    Requirements(iReq).Objectives = Objectives;
 end
 QE_Course.Requirements = Requirements;
-QE_Course.Result = dot(cell2mat({Requirements.Weight}),cell2mat({Requirements.Result}));
+QE_Course.Result = sum(cell2mat(tdata(:,10)))/100;
 QE_Course.Analysis = EA_TextMaker(QE_Course);
+QE_Course.Output = tdata;
 
 end

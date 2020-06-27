@@ -72,35 +72,36 @@ if opt == 1
     prompt4 = '输入教学目标考查方式的定义向量 [直接回车输入缺省值：通过期末考试的综合成绩评价] ';
     Spec = input(prompt4);
     if isempty(Spec)
-        Spec = [1];
+        Spec = 1;
     end
 end
 
 %% 输出
-% 定义成绩单的数据结构
-EA_Definition
-
-% 导入成绩单说明
-Definition = ImportSpecification(0, Def_EvalWays, Def_EvalTypes);
-QE_Course.Transcript.Definition = Definition;
+% % 定义成绩单的数据结构（得到Def_EvalTypes和Def_EvalWays）
+% EA_Definition
+% 
+% % 导入成绩单说明
+% Definition = ImportSpecification([CourseName,'_',Class(end-3:end),'.xlsx']);
+% QE_Course.Transcript.Definition = Definition;
 
 % 调用GetData导入全部课程的成绩单
-db_Outcome0 = GetData({Class}); % 导入“简单成绩单”
-db_Outcome1 = GetData({Class},1); % 导入“详细成绩单”
+db_Outcome0 = GetData1({Class}); % 导入“简单成绩单”
+db_Outcome1 = GetData1({Class},1); % 导入“详细成绩单”
 % 用“详细成绩单”代替“简单成绩单”
 db_Outcome = db_Outcome0;
 for iCourse = 1:length(db_Outcome1)
     if ~isempty(db_Outcome1(iCourse).(Class))
-        idx_RepeatedCourse = find(strcmp(db_Outcome1(iCourse).ID, [db_Outcome.ID]));
+        idx_RepeatedCourse = strcmp(db_Outcome1(iCourse).ID, [db_Outcome.ID]);
         db_Outcome(idx_RepeatedCourse).(Class) = db_Outcome1(iCourse).(Class);
     end
 end
 Transcript = db_Outcome(idx).(Class);
+Definition = db_Outcome(idx).(Class).Definition;
 if isempty(Transcript)
     disp('No transcript in dataset and STOP')
     return
 end
-QE_Course.Transcript.Detail = Transcript;
+QE_Course.Transcript = Transcript;
 
 % 构造QE_Course
 QE_Course.ID = db_Curriculum.ID{idx};
