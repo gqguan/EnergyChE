@@ -1,4 +1,4 @@
-function [output, db_Curriculum, db_GradRequire] = GetData(Years, opt)
+function [output, db_Curriculum, db_GradRequire] = GetData1(Years, opt)
 %% 从工作空间中的dataset变量中提取指定年级的各课程全部学生成绩单
 %
 % 功能说明：
@@ -18,14 +18,14 @@ function [output, db_Curriculum, db_GradRequire] = GetData(Years, opt)
 % db_GradRequire - (table) preset graduation requirement
 %
 % by Dr. GUAN Guoqiang @ SCUT on 2019/9/21
+%                                2020/6/27
 
 %% Initialize
 clear detail BlankRecord;
 load('database.mat', 'db_Curriculum', 'db_GradRequire', 'dataset', 'dataset1')
 BlankRecord_idx = 1;
-detail = struct([]);
 BlankRecord = struct([]);
-output = struct([]);
+output_AllYears = struct([]);
 % Build a default table to show the completion of file imported
 switch nargin
     case 1
@@ -34,39 +34,36 @@ switch nargin
         Years = {'class2013', 'class2014', 'class2015'};
         opt = 0;
 end
-% Import all transcripts if dataset is not existed
-if ~exist('dataset', 'var')
-    [dataset, ~] = ImportTranscripts();
-end
 
 %% Get all transcripts of given course according to the course ID
 for i = 1:height(db_Curriculum)
 %     if i == 49
 %         disp('debugging')
 %     end
-    detail(i).ID = db_Curriculum.ID(i);
-    detail(i).Name = db_Curriculum.Name(i);
-    detail(i).Credit = db_Curriculum.Credit(i);
+    output_AllYears(i).ID = db_Curriculum.ID(i);
+    output_AllYears(i).Name = db_Curriculum.Name(i);
+    output_AllYears(i).Credit = db_Curriculum.Credit(i);
     switch opt
         case 0
-            getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.ID(i)));
+            getData = dataset(strcmp({dataset.CourseID}, db_Curriculum.ID(i)));
         case 1
-            getTranscript = dataset1(strcmp({dataset1.CourseID}, db_Curriculum.ID(i)));
+            getData = dataset1(strcmp({dataset1.CourseID}, db_Curriculum.ID(i)));
     end
-    if ~isempty(getTranscript)
-        CombineTranscript()
+    if ~isempty(getData)
+        Transcript = CombineTranscript(output_AllYears(i).Name{:}, getData);
         % Get the categories according to year
-        YearList = categories(categorical(AllStudents.Year));
+        YearList = categories(categorical(Transcript.Detail.Year));
         for j = 1:length(YearList)
-            fieldname = strcat('class', YearList(j)); 
-            fieldname = [fieldname{:}];
-            detail(i).(fieldname) = AllStudents(strcmp(AllStudents.Year, YearList(j)),:);
+            fieldname = strcat('class', YearList{j});
+            idx_ExtractYear = strcmp(Transcript.Detail.Year, YearList(j));
+            output_AllYears(i).(fieldname).Detail = Transcript.Detail(idx_ExtractYear,:);
+            output_AllYears(i).(fieldname).Definition = Transcript.Definition;
         end     
     end
     for j = 1:length(Years)
         fieldname = Years(j);
-        if find(ismember(fieldnames(detail(i)), fieldname{:})) ~= 0
-            if isempty(detail(i).(fieldname{:}))
+        if find(ismember(fieldnames(output_AllYears(i)), fieldname{:})) ~= 0
+            if isempty(output_AllYears(i).(fieldname{:}))
                 BlankRecord(BlankRecord_idx).idx = i;
                 BlankRecord(BlankRecord_idx).Name = db_Curriculum.Name(i);
                 BlankRecord(BlankRecord_idx).ID = db_Curriculum.ID(i);
@@ -81,59 +78,93 @@ end
 %% Recheck the empty ones with IDv2018
 for BlankRecord_idx = 1:length(BlankRecord)
     i = BlankRecord(BlankRecord_idx).idx;
-    getTranscript = dataset(strcmp({dataset.CourseID}, db_Curriculum.IDv2018(i)));
-    if ~isempty(getTranscript)
-        CombineTranscript()
-        % Get the given year
-        fieldname = BlankRecord(BlankRecord_idx).class; 
-        fieldname = [fieldname{:}]; year = fieldname((end-3):end);
-        detail(i).(fieldname) = AllStudents(strcmp(AllStudents.Year, year),:); 
+    % 按2018版课程代码提取数据
+    getData = dataset(strcmp({dataset.CourseID}, db_Curriculum.IDv2018(i)));
+    if ~isempty(getData)
+        % 合并具有相同课程代码的成绩单
+        Transcript = CombineTranscript(output_AllYears(i).Name{:}, getData);
+        % 从年级名称（例如class2013）提取年级字段
+        fieldname = BlankRecord(BlankRecord_idx).class{:}; 
+        year = fieldname((end-3):end);
+        % 按年级筛选成绩单
+        idx_ExtractedYear = strcmp(Transcript.Detail.Year, year);
+        output_AllYears(i).(fieldname).Detail = Transcript.Detail(idx_ExtractedYear,:);
+        output_AllYears(i).(fieldname).Definition = Transcript.Definition;
     end
 end
 
 %% Output
-for course_sn = 1:length(detail)
-    output(course_sn).ID = detail(course_sn).ID;
-    output(course_sn).Name = detail(course_sn).Name;
-    output(course_sn).Credit = detail(course_sn).Credit;
-    for year_sn = 1:length(Years)
-        year = Years(year_sn); year = year{:};
-        if any(strcmp(year, fieldnames(detail)))
-            output(course_sn).(year) = detail(course_sn).(year); 
-        else
-            fprintf('[Error] 找不到%s级课程“%s”数据!\n', year(6:9), detail(course_sn).Name{:})
-        end
+AllFields = fieldnames(output_AllYears);
+% 课程信息列
+idx_CourseInfo = ~contains(AllFields,'class');
+idx_ExtractCol = idx_CourseInfo;
+% 
+for iYear = 1:length(Years)
+    idx_Year = strcmp(AllFields,Years(iYear));
+    if any(idx_Year)
+        idx_ExtractCol = idx_ExtractCol|idx_Year;
+    else
+        sprintf('【错误】找不到%s级课程数据!\n', Years{iYear})
+    end
+end
+output = struct();
+for iCourse = 1:length(output_AllYears)
+    getFieldNames = AllFields(idx_ExtractCol);
+    for iField = 1:length(getFieldNames)
+        output(iCourse).(getFieldNames{iField}) = output_AllYears(iCourse).(getFieldNames{iField});
     end
 end
 
+
 %% 添加教师和选课代码列并合并成绩单（课程“毕业设计(论文)”只合并成绩单）
-function CombineTranscript()
-    if ~strcmp(detail(i).Name{:}, '毕业设计(论文)')
-        % 附加教师和选课代码
-        clear Teacher CourseCode
-        Teacher(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).Teacher};
-        CourseCode(1:height(getTranscript(1).StudentScore),1) = {getTranscript(1).CourseCode};
-        AllStudents = [getTranscript(1).StudentScore, table(Teacher), table(CourseCode)];
-        % 当同一门课程有多张成绩单时，把成绩单上的学生列表合并
-        if length(getTranscript) >= 2
-            for j = 2:length(getTranscript)
-                clear Teacher CourseCode
-                Teacher(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).Teacher};
-                CourseCode(1:height(getTranscript(j).StudentScore),1) = {getTranscript(j).CourseCode};
-                AddStudents = [getTranscript(j).StudentScore, table(Teacher), table(CourseCode)];
-                AllStudents = [AllStudents; AddStudents];
+function Transcript = CombineTranscript(CourseName, dataset_extracted)
+    if ~strcmp(CourseName, '毕业设计(论文)')
+        Definition = dataset_extracted(1).Definition;
+        StudentScore = dataset_extracted(1).StudentScore;
+        % 在成绩单中附加教师和选课代码
+        Teacher = cell(height(StudentScore),1);
+        Teacher(:,1) = {dataset_extracted(1).Teacher};
+        CourseCode = cell(height(StudentScore),1);
+        CourseCode(:,1) = {dataset_extracted(1).CourseCode};
+        Detail = [StudentScore,table(Teacher,CourseCode)];
+        NumExtracted = length(dataset_extracted);
+        if NumExtracted >= 2
+            for iData = 2:NumExtracted
+                if isequaln(Definition,dataset_extracted(iData).Definition)
+                    StudentScore = dataset_extracted(iData).StudentScore;
+                    Teacher = cell(height(StudentScore),1);
+                    Teacher(:,1) = {dataset_extracted(iData).Teacher};
+                    CourseCode = cell(height(StudentScore),1);
+                    CourseCode(:,1) = {dataset_extracted(iData).CourseCode};
+                    Detail = [Detail;[StudentScore,table(Teacher,CourseCode)]];
+                else
+                    sprintf('【警告】课程“%s”存在%d张成绩单，合并时发现第%d张成绩单的定义与第1张不同：输出前%d张成绩单!\n', ...
+                            CourseName, NumExtracted, iData, iData-1)
+                    break
+                end
             end
         end
     else
-        AllStudents = getTranscript(1).StudentScore;
-        % 当同一门课程有多张成绩单时，把成绩单上的学生列表合并
-        if length(getTranscript) >= 2
-            for j = 2:length(getTranscript)
-                AddStudents = getTranscript(j).StudentScore;
-                AllStudents = [AllStudents; AddStudents];
+        Definition = dataset_extracted(1).Definition;
+        StudentScore = dataset_extracted(1).StudentScore;
+        Detail = StudentScore;
+        NumExtracted = length(dataset_extracted);
+        if NumExtracted >= 2
+            for iData = 2:NumExtracted
+                if isequaln(Definition,dataset_extracted(iData).Definition)
+                    StudentScore = dataset_extracted(iData).StudentScore;
+                    Detail = [Detail;StudentScore];
+                else
+                    sprintf('【警告】课程“%s”存在%d张成绩单，合并时发现第%d张成绩单的定义与第1张不同：输出前%d张成绩单!\n', ...
+                            CourseName, NumExtracted, iData, iData-1)
+                    break
+                end
             end
         end
     end
+    % 输出带成绩单定义的成绩单
+    Transcript.Definition = Definition;
+    Transcript.Detail = Detail;
 end
 
 end

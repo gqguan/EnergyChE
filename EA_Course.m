@@ -77,16 +77,9 @@ if opt == 1
 end
 
 %% 输出
-% % 定义成绩单的数据结构（得到Def_EvalTypes和Def_EvalWays）
-% EA_Definition
-% 
-% % 导入成绩单说明
-% Definition = ImportSpecification([CourseName,'_',Class(end-3:end),'.xlsx']);
-% QE_Course.Transcript.Definition = Definition;
-
 % 调用GetData导入全部课程的成绩单
-db_Outcome0 = GetData1({Class}); % 导入“简单成绩单”
-db_Outcome1 = GetData1({Class},1); % 导入“详细成绩单”
+db_Outcome0 = GetData({Class}); % 导入“简单成绩单”
+db_Outcome1 = GetData({Class},1); % 导入“详细成绩单”
 % 用“详细成绩单”代替“简单成绩单”
 db_Outcome = db_Outcome0;
 for iCourse = 1:length(db_Outcome1)
