@@ -43,6 +43,7 @@ for i = 1:FileNum
     % Read the spreadsheet file
     FullPath = strcat(PathName, FileNames(i));
     [~, ~, raw] = xlsread([FullPath{:}],'Sheet1');
+    % 对空的
     raw(cellfun(@(x) ~isempty(x) && isnumeric(x) && isnan(x),raw)) = {''};
     switch opt
         case(0)
@@ -65,22 +66,13 @@ for i = 1:FileNum
                 if idx(iRow) == 0
                     ClassName = raw{iRow,1}; % 班级名称
                 else
-                    iStudent = iStudent+1;
                     rawdata(iStudent,1:raw_Width) = raw(iRow,:);
                     rawdata(iStudent,raw_Width+1) = {ClassName};
                     rawdata(iStudent,raw_Width+2) = {raw{iRow,2}(1:4)};
+                    iStudent = iStudent+1;
                 end
             end
-
-%             % 筛选能源化工专业的学生
-%             idx_ext = cellfun(@(c) ischar(c) && contains(c, '能源化学'), rawdata(:,end));
-%             FirstRow = rawdata(1,:); % 各列的标题行
-%             rawdata = rawdata(idx_ext,:);
-%             % 从学号获取年级
-%             Year = cellfun(@(x) x(1:4), rawdata(1:end,2), 'UniformOutput', false);
-%             % 增加一列存放“年级”
-%             rawdata = [rawdata,Year];
-            
+           
             raw = [FirstRow; rawdata];
             Definition = ImportSpecification('简单成绩单定义1.xlsx');
             % 获取课程成绩
@@ -177,6 +169,22 @@ function Detail = GetTranscript()
     for iName = 1:length(DefHeadNames)
         headTitleCodes(contains(headTitles, DefHeadNames{iName})) = DefHeadCodes(iName);
     end
+    % 筛选没有成绩的学生
+    iCols_Overall = contains(headTitles,'总分')| ...
+                    contains(headTitles,'总评成绩')| ...
+                    contains(headTitles,'综合成绩')| ...
+                    contains(headTitles,'Overall');
+    % 当iCols_Overall由列数据时选第一列
+    iCol_Overall = find(iCols_Overall,1);
+    % 根据raw第1行、第iCol_Over列的数据类型选择数处理的方式
+    switch class(raw{1,iCol_Overall})
+        case('char')
+            idx_Completed = ~isnan(str2double(raw(:,iCol_Overall)));
+        case('double')
+            idx_Completed = ~isnan([raw{:,iCol_Overall}]);
+        otherwise
+    end
+    raw = raw(idx_Completed,:);
     % 从导入成绩单的列名中查找班级列
     iCols_Class = contains(headTitles,'班级')|contains(headTitles,'Class');
     Detail.Class = raw(:,iCols_Class);
