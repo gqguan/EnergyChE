@@ -45,7 +45,7 @@ Grps1(1).ColSpecs = Tab1Specs;
 %% 顺次生成各课程的达成度分析结果
 for iCourse=1:length(QE_Courses)
     % 构建输出文件名称，例如，课程名称_年级
-    class = QE_Courses.Class;
+    class = QE_Courses(iCourse).Class;
     filename = [QE_Courses(iCourse).Name, '_', class];
     % 创建文档对象
     d = Document(filename, 'docx', 'EA_ReportTemplate.dotx');
@@ -136,13 +136,13 @@ for iCourse=1:length(QE_Courses)
         iRow = 1; iCol = 1;
         tdata = cell(sum(QE_Courses(iCourse).Transcript.Definition.Spec),9);
         tdata{iRow,iCol} = QE_Courses(iCourse).Requirements(iReq).Description;
+        tdata{iRow,9} = QE_Courses(iCourse).Requirements(iReq).Result;
         Objectives = QE_Courses(iCourse).Requirements(iReq).Objectives;
         NumObj = length(Objectives);
         for iObj = 1:NumObj
             Objectives(iObj).iRow = iRow;
             Objectives(iObj).iCol = iCol;
             tdata{iRow,2} = Objectives(iObj).Description;
-            tdata{iRow,9} = Objectives(iObj).Result;
             NumType = length(Objectives(iObj).EvalTypes);
             RowNum_Type = zeros(NumType,1);
             for iType = 1:NumType
@@ -295,11 +295,14 @@ for iCourse=1:length(QE_Courses)
         end
         append(t2,r);
     end
-end
     
 % 写入表
 append(d,t2);
 
 % 关闭文档
 close(d);
+
+end
+    
+
 
