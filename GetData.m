@@ -121,22 +121,35 @@ function Transcript = CombineTranscript(CourseName, dataset_extracted)
     if ~strcmp(CourseName, '毕业设计(论文)')
         Definition = dataset_extracted(1).Definition;
         StudentScore = dataset_extracted(1).StudentScore;
+        Detail = StudentScore;
         % 在成绩单中附加教师和选课代码
-        Teacher = cell(height(StudentScore),1);
-        Teacher(:,1) = {dataset_extracted(1).Teacher};
-        CourseCode = cell(height(StudentScore),1);
-        CourseCode(:,1) = {dataset_extracted(1).CourseCode};
-        Detail = [StudentScore,table(Teacher,CourseCode)];
+        if ~isempty(dataset_extracted(1).Teacher)
+            Teacher = cell(height(StudentScore),1);
+            Teacher(:,1) = {dataset_extracted(1).Teacher};
+            Detail = [Detail,table(Teacher)];
+        end
+        if ~isempty(dataset_extracted(1).CourseCode)
+            CourseCode = cell(height(StudentScore),1);
+            CourseCode(:,1) = {dataset_extracted(1).CourseCode};
+            Detail = [Detail,table(CourseCode)];
+        end
         NumExtracted = length(dataset_extracted);
         if NumExtracted >= 2
             for iData = 2:NumExtracted
                 if isequaln(Definition,dataset_extracted(iData).Definition)
                     StudentScore = dataset_extracted(iData).StudentScore;
-                    Teacher = cell(height(StudentScore),1);
-                    Teacher(:,1) = {dataset_extracted(iData).Teacher};
-                    CourseCode = cell(height(StudentScore),1);
-                    CourseCode(:,1) = {dataset_extracted(iData).CourseCode};
-                    Detail = [Detail;[StudentScore,table(Teacher,CourseCode)]];
+                    Detail1 = StudentScore;
+                    if ~isempty(dataset_extracted(iData).Teacher)
+                        Teacher = cell(height(StudentScore),1);
+                        Teacher(:,1) = {dataset_extracted(iData).Teacher};
+                        Detail1 = [Detail1,table(Teacher)];
+                    end
+                    if ~isempty(dataset_extracted(iData).CourseCode)
+                        CourseCode = cell(height(StudentScore),1);
+                        CourseCode(:,1) = {dataset_extracted(iData).CourseCode};
+                        Detail1 = [Detail1,table(CourseCode)];
+                    end
+                    Detail = [Detail;Detail1];
                 else
                     sprintf('【警告】课程“%s”存在%d张成绩单，合并时发现第%d张成绩单的定义与第1张不同：输出前%d张成绩单!\n', ...
                             CourseName, NumExtracted, iData, iData-1)
