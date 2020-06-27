@@ -169,6 +169,10 @@ function Detail = GetTranscript()
     for iName = 1:length(DefHeadNames)
         headTitleCodes(contains(headTitles, DefHeadNames{iName})) = DefHeadCodes(iName);
     end
+    % 若成绩为“五分制”则转换为“百分制”
+    for iCol = 1:size(raw,2)
+        raw(:,iCol) = ConvertScale(raw(:,iCol));
+    end
     % 筛选没有成绩的学生
     iCols_Overall = contains(headTitles,'总分')| ...
                     contains(headTitles,'总评成绩')| ...
