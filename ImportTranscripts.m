@@ -178,9 +178,9 @@ function Detail = GetTranscript()
                     contains(headTitles,'总评成绩')| ...
                     contains(headTitles,'综合成绩')| ...
                     contains(headTitles,'Overall');
-    % 当iCols_Overall由列数据时选第一列
+    % 当iCols_Overall有多列数据时选第一列
     iCol_Overall = find(iCols_Overall,1);
-    % 根据raw第1行、第iCol_Over列的数据类型选择数处理的方式
+    % 根据raw第1行、第iCol_Overall列的数据类型选择数据处理的方式
     switch class(raw{1,iCol_Overall})
         case('char')
             idx_Completed = ~isnan(str2double(raw(:,iCol_Overall)));
@@ -193,7 +193,9 @@ function Detail = GetTranscript()
     iCols_Class = contains(headTitles,'班级')|contains(headTitles,'Class');
     Detail.Class = raw(:,iCols_Class);
     % 筛选能源化工专业的学生
-    idx_ext = cellfun(@(c) ischar(c) && contains(c, '能源化学'), Detail.Class);
+    idx_ext = cellfun(@(c) ischar(c) && (contains(c, '能源化学') || ...
+                                         contains(c, '能源化工') || ...
+                                         contains(c, '能化')) , Detail.Class);
     Detail.Class = Detail.Class(idx_ext);
     raw = raw(idx_ext,:);
     % 从导入成绩单的列名中查找学生姓名
