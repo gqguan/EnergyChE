@@ -20,28 +20,6 @@ subHeaderRowStyle = {VAlign('middle'), InnerMargin('2pt', '2pt', '2pt', '2pt'), 
 subHeaderTextStyle = {Bold, OuterMargin('0pt', '0pt', '0pt', '0pt'), FontFamily('Arial'), HAlign('center')};
 bodyStyle = {OuterMargin('0pt', '0pt', '0pt', '0pt'), InnerMargin('2pt', '2pt', '2pt', '0pt')};
 
-% 定义“达成度计算表”总共包括9列
-Grps1(1) = TableColSpecGroup;
-Grps1(1).Span = 9; % 总列数
-% 第1-2列宽度
-Tab1Specs(1) = TableColSpec;
-Tab1Specs(1).Span = 2;
-Tab1Specs(1).Style = {Width("25%")};
-% 第3列宽度
-Tab1Specs(2) = TableColSpec;
-Tab1Specs(2).Span = 1;
-Tab1Specs(2).Style = {Width("13%")};
-% 第4列宽度
-Tab1Specs(3) = TableColSpec;
-Tab1Specs(3).Span = 1;
-Tab1Specs(3).Style = {Width("7%")};
-% 第5-9列（合计6列）
-Tab1Specs(4) = TableColSpec;
-Tab1Specs(4).Span = 5;
-Tab1Specs(4).Style = {Width("6%")};
-%
-Grps1(1).ColSpecs = Tab1Specs;
-
 %% 顺次生成各课程的达成度分析结果
 for iCourse=1:length(QE_Courses)
     % 构建输出文件名称，例如，课程名称_年级
@@ -65,7 +43,7 @@ for iCourse=1:length(QE_Courses)
     % 建立表对象
     t = Table(9);
     t.Style = [t.Style tableStyle];
-    t.ColSpecGroups = [t.ColSpecGroups Grps1(1)];
+    t.ColSpecGroups = [t.ColSpecGroups,GetTabWidth('达成度分析表', 9)];
     
     % 表头
     r = TableRow;
@@ -237,38 +215,13 @@ for iCourse=1:length(QE_Courses)
     
     % 定义成绩单表格列宽
     NCol = width(QE_Courses(iCourse).Transcript.Detail); % 总列数
-    Grps2(1) = TableColSpecGroup;
-    Grps2(1).Span = NCol;
-    % 第1-2列宽度
-    Tab2Specs(1) = TableColSpec;
-    Tab2Specs(1).Span = 2;
-    Tab2Specs(1).Style = {Width("10%")};
-    % 第3列宽度
-    Tab2Specs(2) = TableColSpec;
-    Tab2Specs(2).Span = 1;
-    Tab2Specs(2).Style = {Width("5%")};
-    % 第4列宽度
-    Tab2Specs(3) = TableColSpec;
-    Tab2Specs(3).Span = 1;
-    Tab2Specs(3).Style = {Width("3%")}; 
-    % 第5列宽度
-    Tab2Specs(4) = TableColSpec;
-    Tab2Specs(4).Span = 1;
-    Tab2Specs(4).Style = {Width("22%")};
-    % 其余列宽度
-    Tab2Specs(5) = TableColSpec;
-    Tab2Specs(5).Span = NCol-5;
-    Tab2Specs(5).Style = {Width([num2str(50/(NCol-5)) '%'])};
-    %
-    Grps2(1).ColSpecs = Tab2Specs;
     
     % 建立表对象
     tdata2 = table2cell(QE_Courses(iCourse).Transcript.Detail);
     Headers = QE_Courses(iCourse).Transcript.Detail.Properties.VariableNames;
     t2 = Table(length(Headers));
-%     t2 = Table(QE_Courses(iCourse).Transcript.Detail);
     t2.Style = [t2.Style tableStyle];
-    t2.ColSpecGroups = [t2.ColSpecGroups Grps2(1)];
+    t2.ColSpecGroups = [t2.ColSpecGroups,GetTabWidth(QE_Courses(iCourse).Name, NCol)];
     
     % 表头
     r = TableRow;
@@ -303,6 +256,75 @@ append(d,t2);
 close(d);
 
 end
-    
+
+function Grps = GetTabWidth(type, NCol)
+    import mlreportgen.dom.*
+    % 定义成绩单表格列宽
+    Grps = TableColSpecGroup;
+    Grps.Span = NCol;    
+    switch type
+        case('达成度分析表')
+            % 第1-2列宽度
+            TabSpecs(1) = TableColSpec;
+            TabSpecs(1).Span = 2;
+            TabSpecs(1).Style = {Width("25%")};
+            % 第3列宽度
+            TabSpecs(2) = TableColSpec;
+            TabSpecs(2).Span = 1;
+            TabSpecs(2).Style = {Width("13%")};
+            % 第4列宽度
+            TabSpecs(3) = TableColSpec;
+            TabSpecs(3).Span = 1;
+            TabSpecs(3).Style = {Width("7%")};
+            % 第5-9列（合计6列）
+            TabSpecs(4) = TableColSpec;
+            TabSpecs(4).Span = 5;
+            TabSpecs(4).Style = {Width("6%")};          
+        case('毕业设计(论文)')
+            % 第1-2列宽度
+            TabSpecs(1) = TableColSpec;
+            TabSpecs(1).Span = 2;
+            TabSpecs(1).Style = {Width("10%")};
+            % 第3列宽度
+            TabSpecs(2) = TableColSpec;
+            TabSpecs(2).Span = 1;
+            TabSpecs(2).Style = {Width("5%")};
+            % 第4列宽度
+            TabSpecs(3) = TableColSpec;
+            TabSpecs(3).Span = 1;
+            TabSpecs(3).Style = {Width("3%")}; 
+            % 第5列宽度
+            TabSpecs(4) = TableColSpec;
+            TabSpecs(4).Span = 1;
+            TabSpecs(4).Style = {Width("22%")};
+            % 其余列宽度
+            TabSpecs(5) = TableColSpec;
+            TabSpecs(5).Span = NCol-5;
+            TabSpecs(5).Style = {Width([num2str(50/(NCol-5)) '%'])};
+        otherwise
+            % 第1列宽度
+            TabSpecs(1) = TableColSpec;
+            TabSpecs(1).Span = 1;
+            TabSpecs(1).Style = {Width("13%")};
+            % 第2列宽度
+            TabSpecs(2) = TableColSpec;
+            TabSpecs(2).Span = 1;
+            TabSpecs(2).Style = {Width("7%")};
+            % 第3列宽度
+            TabSpecs(3) = TableColSpec;
+            TabSpecs(3).Span = 1;
+            TabSpecs(3).Style = {Width("10%")};
+            % 第4列宽度
+            TabSpecs(4) = TableColSpec;
+            TabSpecs(4).Span = 1;
+            TabSpecs(4).Style = {Width("5%")};
+            % 其余列宽度
+            TabSpecs(5) = TableColSpec;
+            TabSpecs(5).Span = NCol-5;
+            TabSpecs(5).Style = {Width([num2str(65/(NCol-4)) '%'])};         
+    end
+    %
+    Grps.ColSpecs = TabSpecs;             
+end
 
 
