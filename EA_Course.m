@@ -77,9 +77,19 @@ if opt == 1
 end
 
 %% 输出
-% 调用GetData导入全部课程的成绩单
-db_Outcome0 = GetData({Class}); % 导入“简单成绩单”
-db_Outcome1 = GetData({Class},1); % 导入“详细成绩单”
+switch opt
+    case(0) % 从database.mat中载入db_Outcome0和db_Outcome1
+        load('database.mat', 'db_Outcome0', 'db_Outcome1')
+    case(1) % 命令行输入指令
+        % 检查当前工作空间中是否存在成绩单数据
+        if ~exist('db_Outcome0', 'var')
+            % 调用GetData导入全部课程的成绩单
+            db_Outcome0 = GetData({Class}); % 导入“简单成绩单”
+        end
+        if ~exist('db_Outcome1', 'var')
+            db_Outcome1 = GetData({Class},1); % 导入“详细成绩单”
+        end
+end
 % 用“详细成绩单”代替“简单成绩单”
 db_Outcome = db_Outcome0;
 for iCourse = 1:length(db_Outcome1)
@@ -89,9 +99,10 @@ for iCourse = 1:length(db_Outcome1)
     end
 end
 Transcript = db_Outcome(idx).(Class);
-Definition = db_Outcome(idx).(Class).Definition;
-if isempty(Transcript)
-    disp('No transcript in dataset and STOP')
+Definition = Transcript.Definition;
+Detail = Transcript.Detail;
+if isempty(Detail)
+    fprintf('【错误】找不到课程“%s”的成绩单',db_Outcome(idx).Name)
     return
 end
 QE_Course.Transcript = Transcript;
