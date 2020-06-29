@@ -35,4 +35,4 @@ for iReq = 1:NReq
     QE_Course.Requirements(iReq) = Requirement;
 end
 % 在原有字段内容后添加Analysis
-QE_Course.Analysis = strcat(QE_Course.Analysis,Analysis);
+QE_Course.Analysis = strcat(EA_TextMaker(QE_Course),Analysis);
