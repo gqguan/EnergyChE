@@ -2,9 +2,9 @@
 %
 % by Dr. Guan Guoqiang @ SCUT on 2020/6/29
 %
-function [QE_Courses,QE_Courses_original,QE_Courses_MultiRepeated] = EA_SaveQE(QE_Course)
+function [QE_Courses,QE_Courses_original,QE_Courses_MultiRepeated] = EA_SaveQE(QE_Course, QE_Courses)
 %
-if ~exist('QE_Courses', 'var')
+if nargin < 2
     load('QE_Courses.mat', 'QE_Courses')
 end
 QE_Courses_original = QE_Courses;
