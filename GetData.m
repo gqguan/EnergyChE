@@ -182,7 +182,6 @@ function AcadYear = GetAcadYear(CourseName, Class)
         return
     end
     % 获取课程名称后与课程清单匹对，确定课程代码和上课的学期
-    load('database.mat', 'db_Curriculum')
     FoundIdx = strcmp(CourseName, db_Curriculum.Name);
     if any(FoundIdx) && (ischar(Class))
         % 从输入“年级”参数中获得年级
