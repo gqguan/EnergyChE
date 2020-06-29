@@ -40,12 +40,13 @@ end
 % db_Outcome1 = GetData(Years,1);
 
 %% 进行达成度计算
+load('QE_Courses.mat', 'QE_Courses')
 for iCourse = 1:length(dataset_New)
     CourseName = dataset_New(iCourse).Course;
     Class = ['class',dataset_New(iCourse).Class];
     fprintf('正在进行%s级课程“%s”达成度计算...\n',Class(6:end),CourseName)
     % 计算达成度
-    QE_Course = EA_Course(CourseName, Class);
+    QE_Course = EA_Course(CourseName, Class, 0);
     % 填入从db_Course变量中找到的与课程名称匹配的教学目标和分析文本
     if ~exist('db_Course', 'var')
         load('database.mat', 'db_Course')
@@ -58,7 +59,7 @@ for iCourse = 1:length(dataset_New)
         QE_Course = EA_FillText(QE_Course, Objectives, Analysis);
     end
     % 存入已进行达成度分析的课程库
-    [QE_Courses,QE_Courses_original,QE_Courses_MultiRepeated] = EA_SaveQE(QE_Course);
+    QE_Courses = EA_SaveQE(QE_Course, QE_Courses);
 end
 % 更新QE_Courses
 fprintf('更新QE_Courses.mat。\n')
