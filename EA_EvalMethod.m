@@ -95,7 +95,7 @@ for iReq = 1:NumReq
     Requirements(iReq).Objectives = Objectives;
 end
 % 修正各评价方式的分值
-CorrectedFullCredit = sum(cell2mat(tdata(:,5)))*cell2mat(tdata(:,5))*100;
+CorrectedFullCredit = cell2mat(tdata(:,5))/sum(cell2mat(tdata(:,5)))*100;
 tdata(:,9) = num2cell(CorrectedFullCredit);
 tdata(:,10) = num2cell(CorrectedFullCredit.*cell2mat(tdata(:,8)));
 % 计算各指标点的达成度

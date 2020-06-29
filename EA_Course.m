@@ -3,22 +3,23 @@
 % 参数说明
 % 输入参数：CourseName - char 进行课程目标达成度分析的课程名称
 %          Class      - char 进行课程目标达成度分析的课程年级
+%          opt        - integer = 0 从database.mat载入db_Outcome0和db_Outcome1
+%                                 1 运行GetData()获得db_Outcome0和db_Outcome1
 % 输出参数：QE_Course  - struct 课程目标达成度分析结果
 %
 %  by Dr. GUAN Guoqiang @ SCUT on 2019-09-14
 %
 
-function QE_Course = EA_Course(CourseName, Class)
+function QE_Course = EA_Course(CourseName, Class, opt)
 %% Initialize
-opt = 0; % 运行模式为安静模式
 idx = 0;
-prompt0 = '输入进行课程达成度分析的课程名称后按回车\n课程名称： ';
-prompt1 = '输入相应的年级（例如class2013）：';
-prompt2 = '输入该课程的教学目标数目：';
+
 if nargin == 0 %  Input the course name
     CourseName = input(prompt0, 's');
     Class = input(prompt1, 's');
-    opt = 1; % 运行模式为对话输入模式
+    opt = 1;
+elseif nargin <= 2
+    opt = 1;
 end
 
 %% 根据输入课程名称在db_Curriculum中获取该课程支撑的毕业要求指标点
@@ -34,61 +35,15 @@ for i = 1:K
         end
     end
 end
-if idx == 0
-    fprintf('Input course is NOT found! \n');
-    return
-else
-    fprintf('Input course is found as \n');
-    idx_UniNum = find(db_Curriculum.ReqMatrix(idx,:));
-    M = sum(db_Curriculum.ReqMatrix(idx,:)); % number of supported indicator
-end
-
-%  Input the number of teaching objectives
-if opt == 1
-    prompt2 = sprintf('%s [直接回车输入缺省值 %d ]: ', prompt2, M);
-    N = input(prompt2);
-    if isempty(N)
-       N = M; % Default value
-    end
-    %  Input the relation matrix of teaching objectives and supported
-    %  graduation requirement
-    prompt3 = '输入教学目标与毕业要求指标点的关系矩阵[M,N] [直接回车输入缺省值] ';
-    C = input(prompt3);
-    if isempty(C)
-        C = eye(M); %  Default matrix of C(M,N), where M=N
-    end
-    if M ~= size(C, 1) && N ~= size(C, 2)
-        fprintf('Error: size(C,1) = %d not %d, or size(C,2) = %d not %d \n', ...
-                size(C, 1), M, size(C, 2), N);
-        return
-    end
-else
-    N = M;
-    C = eye(M);
-end
-
-%  Input the relation matrix of teaching contents and objectives
-if opt == 1
-    prompt4 = '输入教学目标考查方式的定义向量 [直接回车输入缺省值：通过期末考试的综合成绩评价] ';
-    Spec = input(prompt4);
-    if isempty(Spec)
-        Spec = 1;
-    end
-end
 
 %% 输出
 switch opt
     case(0) % 从database.mat中载入db_Outcome0和db_Outcome1
         load('database.mat', 'db_Outcome0', 'db_Outcome1')
     case(1) % 命令行输入指令
-        % 检查当前工作空间中是否存在成绩单数据
-        if ~exist('db_Outcome0', 'var')
-            % 调用GetData导入全部课程的成绩单
-            db_Outcome0 = GetData({Class}); % 导入“简单成绩单”
-        end
-        if ~exist('db_Outcome1', 'var')
-            db_Outcome1 = GetData({Class},1); % 导入“详细成绩单”
-        end
+        % 调用GetData导入全部课程的成绩单
+        db_Outcome0 = GetData({Class}); % 导入“简单成绩单”
+        db_Outcome1 = GetData({Class},1); % 导入“详细成绩单”
 end
 % 用“详细成绩单”代替“简单成绩单”
 db_Outcome = db_Outcome0;
@@ -112,11 +67,14 @@ QE_Course.ID = db_Curriculum.ID{idx};
 QE_Course.Name = db_Curriculum.Name{idx};
 QE_Course.Class = Class(6:end);
 Requirements = struct();
-for iReq = 1:M
+idx_UniNum = find(db_Curriculum.ReqMatrix(idx,:));
+NumReq = sum(db_Curriculum.ReqMatrix(idx,:));
+Req2Obj = eye(NumReq);
+for iReq = 1:NumReq
     Requirements(iReq).IdxUniNum = idx_UniNum(iReq);
     Requirements(iReq).Description = db_GradRequire.Spec{idx_UniNum(iReq)};
     Objectives = struct();
-    for iObj = 1:sum(C(iReq,:))
+    for iObj = 1:sum(Req2Obj(iReq,:))
         Objectives(iObj).Description = sprintf('请输入第%d个指标点相应的第%d个教学目标说明',iReq,iObj);
         EvalTypes = Definition.EvalTypes;
         for iType = 1:length(QE_Course.Transcript.Definition.Spec)
@@ -143,7 +101,7 @@ for iReq = 1:M
 end
 QE_Course.Requirements = Requirements;
 QE_Course.Result = sprintf('请输入/计算课程质量');
-QE_Course.RelMatrix.Req2Obj = C;
+QE_Course.RelMatrix.Req2Obj = Req2Obj;
 QE_Course.Analysis = sprintf('课程：%s-达成度分析（示例）',CourseName);
 
 %% 输入教学目标及各考核内容与教学目标间的支撑关系

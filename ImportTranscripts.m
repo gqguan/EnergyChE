@@ -34,14 +34,15 @@ dataset = repmat(struct([]), FileNum, 1);
 wb_gui = waitbar(0, 'Importing transcripts ...');
 %
 %% Import the data one by one file
-for i = 1:FileNum
+for iFile = 1:FileNum
     AcadYear = '';
     CourseCode = '';
     CourseID = '';
     Course = '';
     Teacher = '';
+    Class = '';
     % Read the spreadsheet file
-    FullPath = strcat(PathName, FileNames(i));
+    FullPath = strcat(PathName, FileNames(iFile));
     [~, ~, raw] = xlsread([FullPath{:}],'Sheet1');
     % 对空的
     raw(cellfun(@(x) ~isempty(x) && isnumeric(x) && isnan(x),raw)) = {''};
@@ -68,10 +69,16 @@ for i = 1:FileNum
                 else
                     rawdata(iStudent,1:raw_Width) = raw(iRow,:);
                     rawdata(iStudent,raw_Width+1) = {ClassName};
-                    rawdata(iStudent,raw_Width+2) = {raw{iRow,2}(1:4)};
+                    rawdata(iStudent,raw_Width+2) = {raw{iRow,2}(1:4)}; % 从学号前4位得年级
                     iStudent = iStudent+1;
                 end
             end
+            
+            % 从多数学生的学号前4位得该班同学的年级
+            Classes = categorical(rawdata(:,raw_Width+2));
+            ClassNames = categories(Classes);
+            [~,iMost] = max(countcats(Classes));
+            Class = ClassNames(iMost);
            
             raw = [FirstRow; rawdata];
             Definition = ImportSpecification('简单成绩单定义1.xlsx');
@@ -81,7 +88,7 @@ for i = 1:FileNum
             % 获取课程信息
             GetCourseInfo(2);
             % 导入成绩单定义
-            Definition = ImportSpecification(FileNames(i));
+            Definition = ImportSpecification(FileNames(iFile));
             % 获取课程成绩
             StudentScore = GetTranscript();
         case 2
@@ -94,16 +101,17 @@ for i = 1:FileNum
     end
             
     % Build the data set
-    dataset(i).AcadYear = AcadYear;
-    dataset(i).CourseID = CourseID;
-    dataset(i).Course = Course;
-    dataset(i).CourseCode = CourseCode;
-    dataset(i).Teacher = Teacher;
-    dataset(i).Definition = Definition;
-    dataset(i).StudentScore = StudentScore;
+    dataset(iFile).AcadYear = AcadYear;
+    dataset(iFile).Class = Class;
+    dataset(iFile).CourseID = CourseID;
+    dataset(iFile).Course = Course;
+    dataset(iFile).CourseCode = CourseCode;
+    dataset(iFile).Teacher = Teacher;
+    dataset(iFile).Definition = Definition;
+    dataset(iFile).StudentScore = StudentScore;
     % Feedback the progress of file import
     prompt = sprintf('已导入%s年课程“%s”（%s）', AcadYear, Course, Teacher);
-    waitbar(i/FileNum, wb_gui, prompt)
+    waitbar(iFile/FileNum, wb_gui, prompt)
 end
 close(wb_gui)
 
@@ -120,12 +128,15 @@ function GetCourseInfo(flag)
             % 提取“选课代码”
             CourseCode =  raw{4,1}(6:end);            
             % Get the acadamic year
-            AcadYear = CourseCode(2:10); % e.g. '2013-2014'           
+            AcadYear = CourseCode(2:10); % e.g. '2013-2014'
+            % 从文件名识别获得年级
+            endIdx = regexp(FileNames{iFile},'[-_\s]', 'once');
+            Class = FileNames{iFile}(1:(endIdx-1));            
         case 2
             % 从导入成绩单的文件名获取课程名称（通过文件名中的识别符“-”、“_”或空格）
-            startIdx = regexp(FileNames{i},'[-_\s]', 'once');
+            startIdx = regexp(FileNames{iFile},'[-_\s]', 'once');
             if ~isempty(startIdx)
-                tryCourseName = FileNames{i}(1:(startIdx-1));
+                tryCourseName = FileNames{iFile}(1:(startIdx-1));
                 % 获取课程名称后与课程清单匹对，确定课程代码和上课的学期
                 load('database.mat', 'db_Curriculum')
                 FoundIdx = strncmp(tryCourseName, db_Curriculum.Name, length(tryCourseName));
@@ -133,7 +144,7 @@ function GetCourseInfo(flag)
                     Course = db_Curriculum.Name{FoundIdx};
                     CourseID = db_Curriculum.ID{FoundIdx};
                     % 从文件名识别获得年级
-                    Class = FileNames{i}((startIdx+1):(startIdx+4));
+                    Class = FileNames{iFile}((startIdx+1):(startIdx+4));
                     % 课程执行的学期
                     if isnumeric(db_Curriculum.Semester(FoundIdx))
                         AcadYear_Num = str2double(Class)+round(db_Curriculum.Semester(FoundIdx)/2);
