@@ -30,6 +30,10 @@ end
 if ~isempty(dataset_Updated)
     dataset1 = [dataset1,dataset_Updated];
     save('database.mat', '-append', 'dataset1')
+    % 按课程表整理数据
+    db_Outcome1 = GetData(Years,1);
+    fprintf('【警告】覆盖dataset.mat中的db_Outcome1变量！\n')
+    save('database.mat','-append','db_Outcome1')  
 else
     fprintf('没有导入新的成绩单。\n')
     opt = input('是否使用database.mat中的dataset1变量进行达成度计算[输入1（继续）/其他数字（终止）]？');
@@ -42,8 +46,6 @@ else
     end
 end
 
-%% 按课程表整理数据
-% db_Outcome1 = GetData(Years,1);
 
 %% 进行达成度计算
 load('QE_Courses.mat', 'QE_Courses')
