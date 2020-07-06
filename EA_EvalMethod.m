@@ -43,7 +43,7 @@ if iscell(Scores)
 end
 AvgTable = array2table(mean(Scores), 'VariableNames', VarNames(Indices_SelectedCols));
 %% 顺次对各指标点构造考核方法并进行达成度计算
-% 按成绩单定义和关系矩阵Obj2Content构造数据结构
+% 按成绩单定义和关系矩阵Obj2Way构造数据结构
 NRow = 1;
 tdata = {};
 for iReq = 1:NumReq
