@@ -6,12 +6,12 @@ function QE_Course = EA_EvalMethod(QE_Course)
 %% 初始化
 Requirements = QE_Course.Requirements;
 NumReq = length(Requirements);
-Obj2Content = QE_Course.RelMatrix.Obj2Content;
+Obj2Way = QE_Course.RelMatrix.Obj2Way;
 Spec = QE_Course.Transcript.Definition.Spec;
 Def_EvalTypes = QE_Course.Transcript.Definition.EvalTypes;
 % 获取考核方式代码向量
 TypeCodes = cell(1,length(Def_EvalTypes));
-WayCodes = cell(1,size(Obj2Content,2));
+WayCodes = cell(1,size(Obj2Way,2));
 iWayCode = 1;
 for iType = 1:length(Def_EvalTypes)
     TypeCodes(iType) = {Def_EvalTypes(iType).Code};
@@ -54,7 +54,7 @@ for iReq = 1:NumReq
         tdata{NRow,2} = Objectives(iObj).Description;
         EvalTypes = Objectives(iObj).EvalTypes;           
         % 获得该教学目标的考核方式代码
-        Indices = Obj2Content(iReq,:);
+        Indices = Obj2Way(iReq,:);
         % 按Spec截取各类考核的相关方式
         Spec1 = cell(1,length(Spec));
         Indices_DeleteType = false(1,length(EvalTypes));

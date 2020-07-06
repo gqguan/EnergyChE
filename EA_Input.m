@@ -79,7 +79,7 @@ pause
 
 %% Êä³ö
 EA_Matrix = get(uit, 'Data');
-QE_Course.RelMatrix.Obj2Content  = cell2mat(EA_Matrix(:,3:NumWay+2));
+QE_Course.RelMatrix.Obj2Way  = cell2mat(EA_Matrix(:,3:NumWay+2));
 iRow = 1;
 for iReq = 1:NumReq
     NumObj = length(QE_Course.Requirements(iRow).Objectives);

@@ -36,7 +36,7 @@ QE_Courses
 	Output - cell 
 	RelMatrix - struct
 		Req2Obj - double matrix(M,N)
-		Obj2Content - double matrix(N,sum(WayDefs))
+		Obj2Way - double matrix(N,sum(WayDefs))
 	Transcript - struct
 		Definition - struct
 			Spec - double array, e.g., [5 4 1] (即三种评价类型，各类评价分别采用5、4和1种评价方式)
