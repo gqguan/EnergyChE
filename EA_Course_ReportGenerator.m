@@ -58,7 +58,7 @@ for iCourse=1:length(QE_Courses)
     te = TableEntry(p);
     te.RowSpan = 2;
     append(r,te);
-    p = Paragraph('达成途径');
+    p = Paragraph('达成评价途径');
     p.Style = [p.Style mainHeaderTextStyle];
     te = TableEntry(p);
     te.ColSpan = 2;
