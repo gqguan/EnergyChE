@@ -2,7 +2,7 @@
 %
 % 参数说明
 % 输入参数：QE_Course (struct)
-% 输出参数：QE_Course (struct) 
+% 输出参数：QE_Course (struct) 增加RelMatrix.Obj2Way矩阵
 %
 % by Dr. Guan Guoqiang @ SCUT on 2020/6/20
 %
