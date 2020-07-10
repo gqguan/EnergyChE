@@ -47,10 +47,12 @@ switch opt
 end
 % 用“详细成绩单”代替“简单成绩单”
 db_Outcome = db_Outcome0;
-for iCourse = 1:length(db_Outcome1)
-    if ~isempty(db_Outcome1(iCourse).(Class))
-        idx_RepeatedCourse = strcmp(db_Outcome1(iCourse).ID, [db_Outcome.ID]);
-        db_Outcome(idx_RepeatedCourse).(Class) = db_Outcome1(iCourse).(Class);
+if any(contains(fieldnames(db_Outcome1),Class))
+    for iCourse = 1:length(db_Outcome1)
+        if ~isempty(db_Outcome1(iCourse).(Class))
+            idx_RepeatedCourse = strcmp(db_Outcome1(iCourse).ID, [db_Outcome.ID]);
+            db_Outcome(idx_RepeatedCourse).(Class) = db_Outcome1(iCourse).(Class);
+        end
     end
 end
 Transcript = db_Outcome(idx).(Class);
