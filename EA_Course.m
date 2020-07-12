@@ -22,22 +22,18 @@ end
 if ~exist('opt','var')
     opt = 1;
 end
-% 初值
-idx = 0;
-
 
 %% 根据输入课程名称在db_Curriculum中获取该课程支撑的毕业要求指标点
 %  Acquire the preset course info 
 load('database.mat', 'db_Curriculum', 'db_GradRequire');
-K = length(db_Curriculum.Name); % number of courses
-for i = 1:K
-    name = db_Curriculum.Name{i};
-    if size(CourseName) == size(name)
-        if CourseName == name
-            idx = i;
-            break
-        end
-    end
+NumCourse = length(db_Curriculum.Name); % number of courses
+idxes_Course = strcmp(db_Curriculum.Name,CourseName);
+if any(idxes_Course)
+    cprintf('Comments','计算“%s”课程目标达成度。\n',CourseName)
+    idx = find(idxes_Course);
+else
+    cprintf('err','【错误】课程矩阵中没有“%s”！\n',CourseName)
+    return
 end
 
 %% 输出
