@@ -12,15 +12,19 @@
 
 function QE_Course = EA_Course(CourseName, Class, opt)
 %% Initialize
-idx = 0;
-
-if nargin == 0 %  Input the course name
+% 输入参数检查
+if ~exist('CourseName','var')
     CourseName = input(prompt0, 's');
+end
+if ~exist('Class','var')
     Class = input(prompt1, 's');
-    opt = 1;
-elseif nargin <= 2
+end
+if ~exist('opt','var')
     opt = 1;
 end
+% 初值
+idx = 0;
+
 
 %% 根据输入课程名称在db_Curriculum中获取该课程支撑的毕业要求指标点
 %  Acquire the preset course info 
