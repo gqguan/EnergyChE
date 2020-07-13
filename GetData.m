@@ -168,7 +168,11 @@ function Transcript = CombineTranscript(CourseName, Class, dataset_extracted)
     elseif isempty(GetStructs)
         fprintf('【警告】找不到%s学年课程“%s”成绩单！\n', GetAcadYear(CourseName, Class), CourseName)
     else
-        fprintf('【警告】%s学年课程“%s”成绩单定义不同！\n', GetAcadYear(CourseName, Class), CourseName)
+        fprintf('【警告】%s学年课程“%s”存在多个定义不同的成绩单，', GetAcadYear(CourseName, Class), CourseName)
+        fprintf('保留最后一个课程成绩单！\n')
+        GetTabs = tdata(idx_GetTab(end),:);
+        GetStructs = table2struct(GetTabs);
+        Transcript = CombineTranscript(CourseName, Class, GetStructs);
     end
     % 输出带成绩单定义的成绩单
     Transcript.Definition = Definition;
