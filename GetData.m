@@ -37,7 +37,7 @@ end
 
 %% Get all transcripts of given course according to the course ID
 for iCourse = 1:height(db_Curriculum)
-%     if iCourse == 53
+%     if iCourse == 33 % 33-工程热力学
 %         disp('debugging')
 %     end
     disp(db_Curriculum.Name{iCourse})
@@ -168,11 +168,13 @@ function Transcript = CombineTranscript(CourseName, Class, dataset_extracted)
     elseif isempty(GetStructs)
         fprintf('【警告】找不到%s学年课程“%s”成绩单！\n', GetAcadYear(CourseName, Class), CourseName)
     else
-        fprintf('【警告】%s学年课程“%s”存在多个定义不同的成绩单，', GetAcadYear(CourseName, Class), CourseName)
+        cprintf('Comments','【警告】%s学年课程“%s”存在多个定义不同的成绩单！', GetAcadYear(CourseName, Class), CourseName)
         fprintf('保留最后一个课程成绩单！\n')
-        GetTabs = tdata(idx_GetTab(end),:);
+        GetTabs = tdata(find(idx_GetTab,1,'last'),:);
         GetStructs = table2struct(GetTabs);
-        Transcript = CombineTranscript(CourseName, Class, GetStructs);
+        tmp = CombineTranscript(CourseName, Class, GetStructs);
+        Definition = tmp.Definition;
+        Detail = tmp.Detail;
     end
     % 输出带成绩单定义的成绩单
     Transcript.Definition = Definition;
