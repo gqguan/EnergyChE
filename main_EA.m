@@ -54,7 +54,8 @@ for iCourse = 1:length(dataset_New)
     Class = ['class',dataset_New(iCourse).Class];
     fprintf('正在进行%s级课程“%s”达成度计算...\n',Class(6:end),CourseName)
     % 计算达成度
-    QE_Course = EA_Course(CourseName, Class, 0);
+    opt = input('是否重新生成db_Outcome0和db_Outcome1变量[输入1（是）/0（否，使用database.mat中的变量）]');
+    QE_Course = EA_Course(CourseName, Class, opt);
     % 填入从db_Course变量中找到的与课程名称匹配的教学目标和分析文本
     if ~exist('db_Course', 'var')
         load('database.mat', 'db_Course')
