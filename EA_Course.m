@@ -14,10 +14,10 @@ function QE_Course = EA_Course(CourseName, Class, opt)
 %% Initialize
 % 输入参数检查
 if ~exist('CourseName','var')
-    CourseName = input(prompt0, 's');
+    CourseName = input('输入课程名称：', 's');
 end
 if ~exist('Class','var')
-    Class = input(prompt1, 's');
+    Class = input('输入年级：', 's');
 end
 if ~exist('opt','var')
     opt = 1;
