@@ -189,6 +189,10 @@ function Detail = GetTranscript()
                     contains(headTitles,'总评成绩')| ...
                     contains(headTitles,'综合成绩')| ...
                     contains(headTitles,'Overall');
+    if ~any(iCols_Overall)
+        cprintf('err','【错误】成绩单数据中无综合成绩列！\n')
+        return
+    end
     % 当iCols_Overall有多列数据时选第一列
     iCol_Overall = find(iCols_Overall,1);
     % 根据raw第1行、第iCol_Overall列的数据类型选择数据处理的方式
