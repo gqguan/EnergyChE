@@ -7,6 +7,7 @@
 %   EA_GetReqMatrix()
 %   EA_ImportQECourses()
 %   EA_GradReq()
+%     EA_DefGR()
 %   Tab2Word()
 
 %% ≥ı ºªØ
