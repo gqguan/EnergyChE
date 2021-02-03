@@ -107,7 +107,18 @@ QE_Course.RelMatrix.Req2Obj = Req2Obj;
 QE_Course.Analysis = sprintf('课程：%s-达成度分析（示例）',CourseName);
 
 %% 输入教学目标及各考核内容与教学目标间的支撑关系
-QE_Course = EA_Input(QE_Course);
+opt_mode = input('请输入获得Obj2Way关系矩阵的方式：[1] 通过EA_Input()，[2] 输入O2C和C2W矩阵后通过EA_GetRelMatrix()');
+switch opt_mode
+    case(1)
+        QE_Course = EA_Input(QE_Course);
+    case(2)
+        load('database.mat','db_Course')
+        idxFound = strcmp({db_Course.Name}, CourseName);
+        QE_Course.RelMatrix.Obj2Way = EA_GetRelMatrix(db_Course(idxFound).(Class).O2C,db_Course(idxFound).(Class).C2W);
+        QE_Course.RelMatrix.O2C = db_Course(idxFound).(Class).O2C;
+        QE_Course.RelMatrix.C2W = db_Course(idxFound).(Class).C2W;
+end
+
 
 %% 计算达成度
 QE_Course = EA_EvalMethod(QE_Course);

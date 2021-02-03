@@ -219,42 +219,76 @@ for iCourse=1:length(QE_Courses)
     % 建立表对象
     tdata2 = table2cell(QE_Courses(iCourse).Transcript.Detail);
     Headers = QE_Courses(iCourse).Transcript.Detail.Properties.VariableNames;
-    t2 = Table(length(Headers));
-    t2.Style = [t2.Style tableStyle];
-    t2.ColSpecGroups = [t2.ColSpecGroups,GetTabWidth(QE_Courses(iCourse).Name, NCol)];
+    % 当表列数超过25时分成多个表输出
+    idxesCols = SplitTabCol(NCol); % idxesCol行数为子表数目，每行为子表在原表的列索引
     
-    % 表头
-    r = TableRow;
-    r.Style = [r.Style mainHeaderRowStyle];
-    for iCol = 1:length(Headers)
-        p = Paragraph(Headers{iCol});
-        p.Style = [p.Style mainHeaderTextStyle];
-        te = TableEntry(p);
-        append(r,te);
-    end
-    append(t2,r);
-    
-    % 表内容
-    for iRow = 1:size(tdata2,1)
+    for iTab = 1:size(idxesCols,1)
+        idxesCol = idxesCols(iTab,:);
+        subTab_data = tdata2(:,idxesCol);
+        subTab_head = Headers(idxesCol);
+        NCol_subTab = sum(idxesCol);
+        % 创建表对象
+        t2 = Table(length(subTab_head));
+        t2.Style = [t2.Style tableStyle];
+        t2.ColSpecGroups = [t2.ColSpecGroups,GetTabWidth(QE_Courses(iCourse).Name, NCol_subTab)];
+        % 表头
         r = TableRow;
-        r.Style = [r.Style bodyStyle {HAlign('center')}];
-        for iCol = 1:size(tdata2,2)
-            content = tdata2{iRow,iCol};
-            if isnumeric(content)
-                content = num2str(round(content,3,'significant'));
-            end
-            te = TableEntry(content);
+        r.Style = [r.Style mainHeaderRowStyle];
+        for iCol = 1:length(subTab_head)
+            p = Paragraph(subTab_head{iCol});
+            p.Style = [p.Style mainHeaderTextStyle];
+            te = TableEntry(p);
             append(r,te);
         end
         append(t2,r);
+        % 表内容
+        for iRow = 1:size(subTab_data,1)
+            r = TableRow;
+            r.Style = [r.Style bodyStyle {HAlign('center')}];
+            for iCol = 1:size(subTab_data,2)
+                content = subTab_data{iRow,iCol};
+                if isnumeric(content)
+                    content = num2str(round(content,3,'significant'));
+                end
+                te = TableEntry(content);
+                append(r,te);
+            end
+            append(t2,r);
+        end
+        % 写入表
+        append(d,t2);
+        if iTab ~= size(idxesCols,1)
+            append(d,Paragraph('下表续...'));
+        end
     end
-    
-% 写入表
-append(d,t2);
 
 % 关闭文档
 close(d);
 
+end
+
+function idxes = SplitTabCol(n)
+    % 把表按列号分为信息列（1-4列）和数据列（其余）
+    infoCol = 1:4;
+    dataCol = 5:n;
+    ndata = length(dataCol);
+    % 构造最大列数为25的若干子表
+    NSubTab = ceil(length(dataCol)/21); % 子表数目
+    % 子表集的列索引初值（每行包括25列，行数为子表数目）
+    idxes = false(NSubTab,n);
+    iStart = 5; nleft = ndata;
+    for iSubTab = 1:NSubTab
+        idxes(iSubTab,1:4) = true;
+        iEnd = iStart+nleft-1;
+        if iEnd-iStart > 21
+            iEnd = iStart+21-1;
+            idxes(iSubTab,iStart:iEnd) = true;
+            iStart = iEnd+1;
+            nleft = nleft-21;
+        else
+            idxes(iSubTab,iStart:iEnd) = true;
+        end
+    end
 end
 
 function Grps = GetTabWidth(type, NCol)
