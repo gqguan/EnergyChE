@@ -39,26 +39,20 @@ if ~exist('TabName','var')
     TabName = TabType;
 end
 
-% switch nargin
-%     case(1)
-%         TabType = '毕业要求达成度结果表';
-%     case(2)
-%         if size(TabHead,2) ~= NCol
-%             fprintf('【错误】输入表头与表体的宽度不一致！\n')
-%             return
-%         end
-%         TabType = '毕业要求达成度结果表';
-% end
 % 载入Matlab报表生成器
 import mlreportgen.dom.*
+% 中文字体样式设置
+headFont=FontFamily;
+headFont.FamilyName='Arial';
+headFont.EastAsiaFamilyName='黑体';
+bodyFont=FontFamily;
+bodyFont.FamilyName='Times New Roman';
+bodyFont.EastAsiaFamilyName='宋体';
 % 定义表属性
 tableStyle = {Width('100%'), Border('solid'), ColSep('solid'), RowSep('solid')};
-mainHeaderRowStyle = {VAlign('middle'), InnerMargin('2pt', '2pt', '2pt', '2pt'), ...
-    BackgroundColor('yellow')};
-mainHeaderTextStyle = {Bold, OuterMargin('0pt', '0pt', '0pt', '0pt'), FontFamily('Arial'), HAlign('center')};
-subHeaderRowStyle = {VAlign('middle'), InnerMargin('2pt', '2pt', '2pt', '2pt'), BackgroundColor('yellow')};
-subHeaderTextStyle = {Bold, OuterMargin('0pt', '0pt', '0pt', '0pt'), FontFamily('Arial'), HAlign('center')};
-bodyStyle = {OuterMargin('0pt', '0pt', '0pt', '0pt'), InnerMargin('2pt', '2pt', '2pt', '0pt')};
+mainHeaderRowStyle = {HAlign('center'), VAlign('middle'), InnerMargin('2pt', '2pt', '2pt', '2pt'), ...
+    BackgroundColor('yellow'), headFont};
+bodyStyle = {OuterMargin('0pt', '0pt', '0pt', '0pt'), InnerMargin('2pt', '2pt', '2pt', '2pt'), bodyFont};
 % 创建文档对象
 d = Document(TabName, 'docx');
 % 打开文档
