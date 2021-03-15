@@ -4,11 +4,11 @@
 %
 % 程序调用结构
 % main_EA2
-%   EA_GetReqMatrix()
-%   EA_ImportQECourses()
-%   EA_GradReq()
+%   EA_GetReqMatrix() 导入课程支撑矩阵
+%   EA_ImportQECourses() 导入课程成绩单
+%   EA_GradReq() 毕业要求达成度计算
 %     EA_DefGR()
-%   Tab2Word()
+%   Tab2Word() 在MS-WORD文档中表格输出
 
 %% 初始化
 clear;
