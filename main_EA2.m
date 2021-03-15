@@ -14,8 +14,8 @@
 clear;
 
 %% 主程序
-% 从微盘的“课程一览表.xlsx”中获取课程支撑矩阵，并与database.mat中的db_Curriculum.ReqMatrix比较
-% 若两者不同可以选择更新指标点的课程支撑矩阵
+% 从对话框选取包含支撑矩阵的EXCEL文件，并与database.mat中的db_Curriculum.ReqMatrix比较
+% 若两者不同可以选择A更新工作空间中指标点的课程支撑矩阵
 db_Curriculum = EA_GetReqMatrix(); 
 % 导入手工输入的课程达成度结果
 QE_Courses = EA_ImportQECourses();
