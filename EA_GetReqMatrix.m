@@ -15,8 +15,9 @@ function db_Curriculum = EA_GetReqMatrix(db_Curriculum)
 % ReqMatrix = reshape([raw{:}],size(raw));
 raw = importReqMatrix;
 ReqMatrix = cell2mat(raw.ReqMatrix);
-% 清除临时变量
-clearvars raw;
+Courses = raw.Course.list;
+% % 清除临时变量
+% clearvars raw;
 
 %% 导入存盘的“课程矩阵”数据
 if exist('db_Curriculum','var')
@@ -36,8 +37,19 @@ else
     cprintf('err', '【错误】课程矩阵尺寸不一致！\n')
     return
 end
-% 按课程列表顺序比较指标点支撑关系是否与电子表格一致
+% 将从文件中导入的课程支撑矩阵按db_Curriculum.Name重新排序
 NumCourse = height(db_Curriculum);
+ReqMatrix1 = zeros(size(ReqMatrix));
+for iCourse = 1:NumCourse
+    idx = strcmp(raw.Course.list,db_Curriculum.Name{iCourse});
+    if ~any(idx)
+        fprintf('[错误] 在Excel导入的课程支撑矩阵中找不到%s！\n',db_Curriculum.Name{iCourse})
+        return
+    end
+    ReqMatrix1(iCourse,:) = ReqMatrix(idx,:);
+end
+ReqMatrix = ReqMatrix1;
+% 按课程列表顺序比较指标点支撑关系是否与电子表格一致
 idxs_Updating = false(NumCourse,1);
 for idx = 1:NumCourse
     if ~isequal(db_Curriculum.ReqMatrix(idx,:),ReqMatrix(idx,:))

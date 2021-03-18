@@ -21,7 +21,8 @@ sheet.VarName.list = sheet.VarName.raw(sheet.VarName.idx);
 sheet.Course.raw = sheet.raw(:,1);
 sheet.Course.idx = cellfun(@(x)~ismissing(string(x)),sheet.Course.raw);
 sheet.Course.idx(1) = false; % 第一行为变量名称说明
-sheet.Course.list = sheet.Course.raw(sheet.Course.idx);
+sheet.Course.list = strip(sheet.Course.raw(sheet.Course.idx),"'"); % 删除字段中的单引号
+sheet.Course.list = strip(sheet.Course.list); % 删除字段中的单引号
 
 % 指标点索引号
 sheet.indicatorNum.raw = sheet.raw(2,:);
