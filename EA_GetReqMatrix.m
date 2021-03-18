@@ -8,7 +8,7 @@
 
 % 由 MATLAB 自动生成于 2020/07/09 10:09:46
 
-function db_Curriculum = EA_GetReqMatrix()
+function db_Curriculum = EA_GetReqMatrix(db_Curriculum)
 %% 从微盘本地文件中导入“课程矩阵”
 % % 在缺省目录位置读入指定的excel文件
 % [~, ~, raw] = xlsread('C:\Users\gqgua\Documents\WXWork\1688853243457453\WeDrive\华南理工大学\能源化学工程专业\达成度分析小组\课程一览表.xlsx','2014','G4:AP59');
