@@ -75,9 +75,9 @@ for iReq = 1:length(ReqLists)
             for iCourse = 1:length(QECourses)
 %                 Credits{iCourse} = db_Curriculum.Credit(strcmp(db_Curriculum.Name,Courses(iCourse)));
                 EvalMethods{iCourse} = '成绩分析法';
-                EvalBasises{iCourse} = '课程目标达成度';
-                Teachers{iCourse} = db_Curriculum.Teacher(strcmp(db_Curriculum.Name,Courses(iCourse)));
-                Documents = {'课程目标达成度报告'};
+                EvalBasises{iCourse} = '课程目标达成评价结果';
+                Teachers{iCourse} = strcat(db_Curriculum.Teacher(strcmp(db_Curriculum.Name,Courses(iCourse))),"、专业负责人");
+                Documents = {'毕业要求达成情况报告'};
                 idx_QECourses = strcmp({QE_Courses1.Name}, Courses(iCourse))|...
                                 strcmp({QE_Courses1.ID}, IDs(iCourse));
                 if any(idx_QECourses)

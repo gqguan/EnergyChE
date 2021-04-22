@@ -1,11 +1,9 @@
-
-%% 毕业要求达成度计算主程序
+%% 2019年毕业要求达成度计算主程序
 %
 % by Dr. Guan Guoqiang @ SCUT on 2020/07/12
 %
 % 程序调用结构
 % main_EA2
-%   EA_GetReqMatrix() 导入课程支撑矩阵
 %   EA_ImportQECourses() 导入课程成绩单
 %   EA_GradReq() 毕业要求达成度计算
 %     EA_DefGR()
@@ -15,13 +13,12 @@
 clear;
 
 %% 主程序
-% 从对话框选取包含支撑矩阵的EXCEL文件，并与database.mat中的db_Curriculum.ReqMatrix比较
-% 若两者不同可以选择A更新工作空间中指标点的课程支撑矩阵
-db_Curriculum = EA_GetReqMatrix(); 
+% 导入2019版培养方案
+load('database.mat', 'db_Curriculum2019a')
 % 导入手工输入的课程达成度结果
 QE_Courses = EA_ImportQECourses();
 % 计算毕业要求达成度
-output = EA_GradReq(QE_Courses,db_Curriculum);
+output = EA_GradReq(QE_Courses,db_Curriculum2019a);
 % 显示未完成课程达成度计算的课程列表及负责教师
 idxes_ZeroValue = strcmp(output(1).Contents(:,6),'0.000');
 Course = categorical(output(1).Contents(idxes_ZeroValue,3));
