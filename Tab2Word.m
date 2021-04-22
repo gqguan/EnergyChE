@@ -208,7 +208,20 @@ close(d);
                 % 第2列宽度
                 TabSpecs(2) = TableColSpec;
                 TabSpecs(2).Span = 1;
-                TabSpecs(2).Style = {Width("70%")};                
+                TabSpecs(2).Style = {Width("70%")};
+            case('指标点支撑课程列表')
+                % 第1列指标点宽度
+                TabSpecs(1) = TableColSpec;
+                TabSpecs(1).Span = 1;
+                TabSpecs(1).Style = {Width("30%")};
+                % 第2列宽度
+                TabSpecs(2) = TableColSpec;
+                TabSpecs(2).Span = 1;
+                TabSpecs(2).Style = {Width("40%")};
+                % 第3列宽度
+                TabSpecs(3) = TableColSpec;
+                TabSpecs(3).Span = 1;
+                TabSpecs(3).Style = {Width("30%")}; 
             otherwise
                 % 第1列宽度
                 TabSpecs(1) = TableColSpec;
