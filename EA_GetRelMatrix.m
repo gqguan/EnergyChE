@@ -16,5 +16,5 @@ end
 O2W = false(NumObj,NumWay);
 
 for iObj = 1:NumObj
-    O2W(iObj,:) = logical(sum(C2W(logical(O2C(iObj,:)),:)));
+    O2W(iObj,:) = logical(sum(C2W(logical(O2C(iObj,:)),:),1));
 end
