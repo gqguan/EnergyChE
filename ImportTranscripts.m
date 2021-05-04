@@ -222,7 +222,7 @@ function Detail = GetTranscript()
     % 从导入成绩单的列名中查找学号
     iCols_SN = contains(headTitles,'学号')|contains(headTitles,'SN');
     Detail.SN = raw(:,iCols_SN);
-    % 从每个同学学号的前4位
+    % 从每个同学学号的后4位
     Detail.Year = cellfun(@(x) x(1:4), raw(:,iCols_SN), 'UniformOutput', false);
     % 若有题目和指导教师列也将其导入
     iCols_Title = contains(headTitles,'课题')|contains(headTitles,'Title');
@@ -244,7 +244,7 @@ function Detail = GetTranscript()
             iCols_Data = iCols_Data|strcmp(DefHeadCodes(iHead), headTitles);
         end
         if ~any(iCols_Data)
-            disp('【错误】成绩单与定义不匹配！')
+            cprintf('err','【错误】成绩单与定义不匹配！')
             return
         end
     end

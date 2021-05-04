@@ -30,9 +30,12 @@ end
 
 %% 根据输入课程名称在db_Curriculum中获取该课程支撑的毕业要求指标点
 %  Acquire the preset course info 
-load('database.mat', 'db_Curriculum', 'db_GradRequire');
-NumCourse = length(db_Curriculum.Name); % number of courses
-idxes_Course = strcmp(db_Curriculum.Name,CourseName);
+load('database.mat', 'db_Curriculum2019a', 'db_Indicators2019');
+Curriculum = db_Curriculum2019a;
+Curriculum.Properties.VariableNames{'IDv2018'} = 'ID';
+Indcators = db_Indicators2019;
+NumCourse = length(Curriculum.Name); % number of courses
+idxes_Course = strcmp(Curriculum.Name,CourseName);
 if any(idxes_Course)
     cprintf('Comments','计算“%s”课程目标达成度。\n',CourseName)
     idx = find(idxes_Course);
@@ -70,16 +73,16 @@ end
 QE_Course.Transcript = Transcript;
 
 % 构造QE_Course
-QE_Course.ID = db_Curriculum.ID{idx};
-QE_Course.Name = db_Curriculum.Name{idx};
+QE_Course.ID = Curriculum.ID{idx};
+QE_Course.Name = Curriculum.Name{idx};
 QE_Course.Class = Class(6:end);
 Requirements = struct();
-idx_UniNum = find(db_Curriculum.ReqMatrix(idx,:));
-NumReq = sum(db_Curriculum.ReqMatrix(idx,:));
+idx_UniNum = find(Curriculum.ReqMatrix(idx,:));
+NumReq = sum(Curriculum.ReqMatrix(idx,:));
 Req2Obj = eye(NumReq);
 for iReq = 1:NumReq
     Requirements(iReq).IdxUniNum = idx_UniNum(iReq);
-    Requirements(iReq).Description = db_GradRequire.Spec{idx_UniNum(iReq)};
+    Requirements(iReq).Description = Indcators.Spec{idx_UniNum(iReq)};
     Objectives = struct();
     for iObj = 1:sum(Req2Obj(iReq,:))
         Objectives(iObj).Description = sprintf('请输入第%d个指标点相应的第%d个教学目标说明',iReq,iObj);
@@ -137,14 +140,15 @@ switch opt2
                     fprintf('[错误] 变量db_Course中课程“%s”不含课程目标、内容和评测点的关系矩阵！\n', CourseName)
                     return
                 end
-            end          
+            end
+            % 将db_Course中的课程目标内容及达成度分析文本输入QE_Course
+            QE_Course = EA_FillCourseObjs(QE_Course,db_Course(idxFound).(Class).Objectives.Contents);
         else
             fprintf('[错误] 变量db_Course中找不到课程“%s”\n',Class,CourseName)
             cprintf('err','程序终止运行！\n')
             return
         end
 end
-
 
 %% 计算达成度
 QE_Course = EA_EvalMethod(QE_Course);
@@ -156,10 +160,20 @@ load('QE_Courses.mat','QE_Courses')
 IDFound = strcmp(QE_Course.ID, {QE_Courses.ID});
 ClassAlsoFound = strcmp(QE_Course.Class, {QE_Courses(IDFound).Class});
 if sum(ClassAlsoFound) ~= 0
-    fprintf('[注意] 存盘变量QE_Courses中已存在%s级课程“%s”结果，新计算结果未保存更新！\n',Class,CourseName)
+    fprintf('[注意] 存盘变量QE_Courses中已存在%s级课程“%s”结果！\n',Class,CourseName)
+    overwrt = input('[Y/N]覆盖存盘QE_Courses.mat文件中的变量QE_Courses：','s');
+    switch overwrt
+        case('Y')
+            save('QE_Courses.mat', 'QE_Courses', '-append')
+            disp('新计算结果已保存更新！')
+        case('N')
+            disp('新计算结果未保存更新！')
+        otherwise
+            disp('无法识别输入指令，新计算结果未保存更新！')
+    end
 else
     QE_Courses = [QE_Courses QE_Course];
-    disp('Save into QE_Courses.')
+    disp('存盘覆盖QE_Courses.mat中的变量QE_Courses.')
     save('QE_Courses.mat', 'QE_Courses', '-append')
 end
 

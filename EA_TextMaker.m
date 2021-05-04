@@ -21,13 +21,13 @@ end
 
 % 确定课程教学质量评价字段
 if QEValue < 0.6
-    QELevel = '不理想';
+    QELevel = '不合格';
 elseif QEValue < 0.7
-    QELevel = '一般';
+    QELevel = '合格';
 elseif QEValue < 0.8
-    QELevel = '正常';
+    QELevel = '中等';
 elseif QEValue < 0.9
-    QELevel = '较好';
+    QELevel = '良好';
 else
     QELevel = '优秀';
 end   

@@ -2,16 +2,13 @@
 %
 % by Dr. Guan Guoqiang @ SCUT on 2020/6/29
 %
-function [QE_Course] = EA_FillText(QE_Course,Objectives,Analysis)
+function [QE_Course] = EA_FillCourseObjs(QE_Course,Objectives)
 %% 初始化
-% 缺省输入参数
-switch nargin
-    case 2
-        Analysis = '';
-end
 nObj = 1;
 iRow = 1;
 NReq = length(QE_Course.Requirements);
+
+%% 依次填入课程支撑各条毕业要求的教学目标
 for iReq = 1:NReq
     Requirement = QE_Course.Requirements(iReq);
     NObj = length(Requirement.Objectives);
@@ -34,5 +31,3 @@ for iReq = 1:NReq
     end
     QE_Course.Requirements(iReq) = Requirement;
 end
-% 在原有字段内容后添加Analysis
-QE_Course.Analysis = strcat(EA_TextMaker(QE_Course),Analysis);
