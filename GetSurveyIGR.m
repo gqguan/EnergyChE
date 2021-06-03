@@ -1,9 +1,16 @@
+function results = GetSurveyIGR()
 %% 从问卷调查教师提交的课程支撑指标点结果数据文件中提取数据
 % 问卷调查网址 https://forms.office.com/r/e9gjC26GP5
 % 
 % by Dr. Guan Guoqiang @ SCUT on 2021/5/30
 
 %% 初始化
+clear all
+% 检查所需文件是否存在，m文件扩展名可省略
+fileChkList = {'importfile' 'database.mat'};
+if any(ChkFiles(fileChkList)) == false
+    return
+end
 load('database.mat', 'db_Indicators')
 
 %% 导入问卷数据文件
@@ -27,7 +34,7 @@ Data1 = Data(TimeCols(:,2) > datetime("2021/5/1"),:);
 
 %% 按提交顺序整理数据
 results = struct([]);
-for i = 1:length(Data1)
+for i = 1:size(Data1,1)
     results(i).Teacher = Data1{i,6};
     results(i).Course = Data1{i,7};
     supportIndicatorIdx = [];
@@ -37,12 +44,6 @@ for i = 1:length(Data1)
             item_GR(item_GR == "") = [];
             UniNums = strtrim(regexp(item_GR,"№\d*.\d*\s",'match'));
             supportIndicatorIdx = [supportIndicatorIdx,cellfun(@(x)find(strcmp(db_Indicators.UniNum,x)),UniNums)];
-%             for j = 1:length(item_GR)
-%                 UniNum = strtrim(regexp(item_GR(j),"№\d*.\d*\s",'match'));
-% %                 UniNum = sscanf(tmp(1),'№%f');
-%                 find(strcmp(db_Indicators.UniNum,UniNum))
-%                 supportIndicatorIdx = [supportIndicatorIdx,UniNum];
-%             end
         end
     end
     results(i).supportIndicators = supportIndicatorIdx;
