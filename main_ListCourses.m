@@ -5,11 +5,11 @@
 %% 初始化
 clear
 % 载入必修和选修课程表
-load('database.mat', 'db_Curriculum2021a', 'db_Curriculum2021b')
+load('database.mat','db_Curriculum2021a','db_Curriculum2021b','db_Indicators2021')
 
 %% 整理列出
 % 从database.mat中载入db_Indicators
-outTab = SupportCourses(db_Curriculum2021a,db_Curriculum2021b);
+outTab = SupportCourses(db_Curriculum2021a,db_Curriculum2021b,db_Indicators2021);
 
 %% 制表输出结果
 % 表头

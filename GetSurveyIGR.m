@@ -11,10 +11,11 @@ fileChkList = {'importfile' 'database.mat'};
 if any(ChkFiles(fileChkList)) == false
     return
 end
-load('database.mat', 'db_Indicators')
+load('database.mat', 'db_Indicators2021')
+db_Indicators = db_Indicators2021;
 
 %% 导入问卷数据文件
-[Data,Workbook] = importfile();
+[Data,~] = importfile();
 % 获取表头
 Heads = Data(1,:);
 Data(1,:) = [];
