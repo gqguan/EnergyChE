@@ -1,8 +1,10 @@
-function oTab = SupportCourses(db_Curriculum1,db_Curriculum2)
+function oTab = SupportCourses(db_Curriculum1,db_Curriculum2,db_Indicators)
 %% 根据输入的培养方案列出各毕业要求指标点支撑的课程列表
 
 % 导入毕业要求及指标说明
-load('database.mat','db_Indicators')
+if ~exist('db_Indicators','var')
+    load('database.mat','db_Indicators');
+end
 
 if ~exist('db_Curriculum2','var')
     % 初始化
