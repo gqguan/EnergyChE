@@ -4,13 +4,14 @@
 
 %% 初始化
 clear
-cCourseList = 'db_Curriculum2019a';
-sCourseList = 'db_Curriculum2019b';
+cCourseList = 'db_Curriculum2021a';
+sCourseList = 'db_Curriculum2021b';
 % 载入必修和选修课程
 load('database.mat',cCourseList)
 load('database.mat',sCourseList)
 % 载入指标点
-load('database.mat','db_Indicators')
+load('database.mat','db_Indicators2021')
+db_Indicators = db_Indicators2021;
 
 %% 按必修课表列出相应支撑的指标点编号
 supportIndicator = string;
