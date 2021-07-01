@@ -13,6 +13,7 @@ courses = db_Curriculum2021a(idx,:);
 %% 对各课程列出其支撑的指标
 supportIndicator = string;
 for iCourse = 1:height(courses)
+% iCourse = 21;
     fprintf('课程《%s》负责人邮件（To: %s）正在发送……',courses.Name(iCourse),courses.Email(iCourse))
     idx = logical(courses.ReqMatrix(iCourse,:));
     UniNums = db_Indicators2021.UniNum(idx);
@@ -22,7 +23,7 @@ for iCourse = 1:height(courses)
         if i == 1
             content = sprintf('<p>%s</p>', strcat(UniNums{i},'：',Specs{i}));
         else
-            content = [content,sprintf('<p>%s</p>', content, strcat(UniNums{i},'：',Specs{i}))];
+            content = [content,sprintf('<p>%s</p>',strcat(UniNums{i},'：',Specs{i}))];
         end
     end
     supportIndicator(iCourse,1) = content;
