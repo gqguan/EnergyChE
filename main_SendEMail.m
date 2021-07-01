@@ -35,6 +35,8 @@ for iCourse = 1:height(courses)
     ctext = [ctext,sprintf('%s\n',char(datetime('now')))];
     ctext = [ctext,sprintf('备注：\n')];
     ctext = [ctext,sprintf('公共教学团队若指定专门负责的老师，烦请转发该邮件给相关老师，谢谢！\n')];
+    checksum = Simulink.getFileChecksum('main_SendEMail.m');
+    ctext = [ctext,sprintf('（邮件生成程序main_SendEMail.m，文件校验码：%s）\n',checksum(end-3:end))];
     % 收件人
     recipient = strsplit(courses.Email(iCourse),'; ');
     % 邮件主题
