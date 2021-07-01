@@ -13,6 +13,7 @@ courses = db_Curriculum2021a(idx,:);
 %% 对各课程列出其支撑的指标
 supportIndicator = string;
 for iCourse = 1:height(courses)
+    fprintf('课程《%s》负责人邮件（%s）正在发送……',courses.Name(iCourse),courses.Email(iCourse))
     idx = logical(courses.ReqMatrix(iCourse,:));
     UniNums = db_Indicators2021.UniNum(idx);
     Specs = db_Indicators2021.Spec(idx);
@@ -42,4 +43,5 @@ for iCourse = 1:height(courses)
     % 邮件主题
     subject = sprintf('能源化工专业必修课《%s》支撑指标点核对',courses.Name(iCourse));
     email(recipient, subject, ctext)
+    fprintf('完成！\n')
 end
