@@ -23,6 +23,7 @@ classdef Course
         ExamMethod = ""
         Benchmark = {}
         Textbook = ""
+        FilePath = ""
     end
     
     methods

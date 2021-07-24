@@ -1,4 +1,4 @@
-%% 将cc按MS-Word模板生成docName文件
+%% 将cc按MS-Word模板templateFile生成docx文件
 %
 % by Dr. Guan Guoqiang @ SCUT on 2021/7/22
 function [status] = Syllabus_genDoc(cc,templateFile,flag) 
@@ -7,8 +7,6 @@ if ismcc || isdeployed
     makeDOMCompilable()
 end
 import mlreportgen.dom.*; 
-% root = 'C:\Users\gqgua\Documents\Git\EnergyChE\SyllabusAssistant\res';
-% root = cd;
 
 % 检查输入参数 
 if nargin == 3
@@ -17,7 +15,7 @@ if nargin == 3
             status = sprintf('模板“%s”文件不存在！',templateFile);
             return
         end
-        doc = Document(cc.Title,'docx',templateFile);
+        doc = Document(cc.FilePath,'docx',templateFile);
         holeId = moveToNextHole(doc); 
         fprintf('Current hole ID: %s\n', holeId);
         textObj = cc.Title;
