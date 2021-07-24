@@ -3,6 +3,9 @@
 % by Dr. Guan Guoqiang @ SCUT on 2021/7/22
 function [status] = Syllabus_genDoc(cc,templateFile,flag) 
 
+if ismcc || isdeployed
+    makeDOMCompilable()
+end
 import mlreportgen.dom.*; 
 % root = 'C:\Users\gqgua\Documents\Git\EnergyChE\SyllabusAssistant\res';
 % root = cd;
@@ -142,7 +145,7 @@ if nargin == 3
         
         status = sprintf('成功创建文件“%s.docx”',cc.Title);
         
-        rptview(cc.Title, 'docx');
+%         rptview(cc.Title, 'docx');
         
     else
         status = '输入参数类型有误';
