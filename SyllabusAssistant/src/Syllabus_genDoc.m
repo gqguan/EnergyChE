@@ -1,14 +1,20 @@
 %% 将cc按MS-Word模板生成docName文件
 %
 % by Dr. Guan Guoqiang @ SCUT on 2021/7/22
-function Syllabus_genDoc(cc,docName,flag) 
+function [status] = Syllabus_genDoc(cc,templateFile,flag) 
 
 import mlreportgen.dom.*; 
+% root = 'C:\Users\gqgua\Documents\Git\EnergyChE\SyllabusAssistant\res';
+% root = cd;
 
 % 检查输入参数 
 if nargin == 3
-    if isequal(class(cc),'Course') && or(ischar(docName),isstring(docName)) 
-        doc = Document(docName,'docx','syllabus.dotx');
+    if isequal(class(cc),'Course') && or(ischar(templateFile),isstring(templateFile))
+        if exist(templateFile,'file') ~= 2
+            status = sprintf('模板“%s”文件不存在！',templateFile);
+            return
+        end
+        doc = Document(cc.Title,'docx',templateFile);
         holeId = moveToNextHole(doc); 
         fprintf('Current hole ID: %s\n', holeId);
         textObj = cc.Title;
@@ -134,49 +140,17 @@ if nargin == 3
 
         close(doc);
         
-        rptview(docName, 'docx');
+        status = sprintf('成功创建文件“%s.docx”',cc.Title);
+        
+        rptview(cc.Title, 'docx');
         
     else
+        status = '输入参数类型有误';
         warning('输入参数类型有误')
     end
 else
+    status = '输入参数不完整';
     warning('输入参数不完整')
 end
-
-function CombineVCell(cArray,Style)
-    import mlreportgen.dom.*
-    NRow = size(cArray,1);
-    for iRow = 1:NRow
-        r = TableRow;
-        r.Style = [r.Style Style];
-        for iCol = 1:NCol
-            if ~isempty(cArray{iRow,iCol})
-                content = cArray{iRow,iCol};
-                if isnumeric(content) % 数值保留4位有效数字
-                    content = num2str(round(content,4,'significant'));
-                end
-                te = TableEntry(content);
-                if NRow ~= 1
-                    % 找该列的下一个非空元素的位置
-                    for jRow = (iRow+1):NRow
-                        NotEmpty = false;
-                        if ~isempty(cArray{jRow,iCol})
-                            NotEmpty = true;
-                            break
-                        end
-                    end
-                    if NotEmpty
-                        te.RowSpan = jRow-iRow;
-                    else
-                        te.RowSpan = jRow-iRow+1;
-                    end
-                end
-                append(r,te);
-            end
-        end
-        append(t,r);
-    end
-end
-
 
 end
