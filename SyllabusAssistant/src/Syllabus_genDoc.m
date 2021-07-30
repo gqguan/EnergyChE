@@ -1,143 +1,201 @@
-%% 将cc按MS-Word模板templateFile生成docx文件
+%% 将对象cc转化为教纲docx文件
 %
-% by Dr. Guan Guoqiang @ SCUT on 2021/7/22
-function [status] = Syllabus_genDoc(cc,templateFile,flag) 
+% by Dr. Guan Guoqiang @ SCUT on 2021/7/26
+function [status] = Syllabus_genDoc(cc,flag) 
 
 if ismcc || isdeployed
     makeDOMCompilable()
 end
 import mlreportgen.dom.*; 
+% 中文字体样式设置
+headFont = FontFamily;
+headFont.FamilyName = 'Arial';
+headFont.EastAsiaFamilyName = '黑体';
+bodyFont = FontFamily;
+bodyFont.FamilyName = 'Times New Roman';
+bodyFont.EastAsiaFamilyName = '宋体';
+% 定义段落属性
+headStyle = {HAlign('center'),FontSize('18pt'),headFont};
+% 定义表属性
+tableStyle = {Width('100%'), Border('solid'), ColSep('solid'), RowSep('solid')};
+bodyStyle = {VAlign('middle'), OuterMargin('0pt', '0pt', '0pt', '0pt'), ...
+    InnerMargin('2pt', '2pt', '2pt', '2pt'), FontSize('12pt'),bodyFont};
 
 % 检查输入参数 
-if nargin == 3
-    if isequal(class(cc),'Course') && or(ischar(templateFile),isstring(templateFile))
-        if exist(templateFile,'file') ~= 2
-            status = sprintf('模板“%s”文件不存在！',templateFile);
-            return
-        end
-        doc = Document(cc.FilePath,'docx',templateFile);
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        textObj = cc.Title;
-        append(doc, textObj);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        textObj = cc.Code;
-        append(doc, textObj);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        textObj = cc.Title;
-        append(doc, textObj);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        textObj = cc.Category;
-        append(doc, textObj);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
+if nargin == 2
+    if isequal(class(cc),'Course')
+        doc = Document(cc.FilePath,'docx');
+        % 教纲标题
+        p = Paragraph(sprintf('《%s》教学大纲',cc.Title));
+        p.Style = headStyle;
+        append(doc, p);
+        % 教纲内容列表
+        NCol = 2; % 内容列表为2列
+        t = Table(NCol);
+        t.Style = [t.Style tableStyle];
+        % 设定表中各列宽度
+        Grps = TableColSpecGroup;
+        Grps.Span = NCol;
+        TabSpecs(1) = TableColSpec;
+        TabSpecs(1).Span = 1;
+        TabSpecs(1).Style = {Width("15%")};
+        TabSpecs(2) = TableColSpec;
+        TabSpecs(2).Span = 1;
+        TabSpecs(2).Style = {Width("85%")};        
+        Grps.ColSpecs = TabSpecs;
+        t.ColSpecGroups = [t.ColSpecGroups,Grps];
+        
+        % 第1-11行
+        % 教纲内容胞矩阵
+        c = cell(11,2);
         if cc.CompulsoryOrNot
             textObj = "必修";
         else
             textObj = "选修";
         end
-        append(doc, textObj);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        textObj = cc.ClassHour;
-        append(doc, textObj);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        textObj = cc.Credits;
-        append(doc, textObj);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        textObj = cc.Semester;
-        append(doc, textObj);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        textObj = cc.Language;
-        append(doc, textObj);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        textObj = string(join(cc.Prerequisites));
-        append(doc, textObj);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
+        c(:,1) = {'课程代码';'课程名称';'英文名称';'课程类别';'课程性质';...
+            '学时';'学分';'开课学期';'开课单位';'适用专业';'授课语言'};
+        c(:,2) = {cc.Code;cc.Title;'';cc.Category;textObj;cc.ClassHour;...
+            cc.Credits;cc.Semester;'化学与化工学院';'能源化学工程';cc.Language};
+        for iRow = 1:11
+            r = TableRow;
+            r.Style = [r.Style,bodyStyle];
+            te = TableEntry(c{iRow,1});
+            append(r,te);
+            te = TableEntry(c{iRow,2});
+            append(r,te);
+            append(t,r);
+        end
+        
+        r = TableRow;
+        r.Style = [r.Style,bodyStyle];
+        te = TableEntry('先修课程');
+        append(r,te);
+        te = TableEntry(string(join(cc.Prerequisites)));
+        append(r,te);
+        append(t,r); 
+        
+        r = TableRow;
+        r.Style = [r.Style,bodyStyle];
+        te = TableEntry('课程对毕业要求的支撑');
+        append(r,te);
         id_outcome = cell(length(cc.Outcomes),1);
+        te = TableEntry;
         for i = 1:length(cc.Outcomes)
-            append(doc,Paragraph(cc.Outcomes{i}));
+            append(te,Paragraph(cc.Outcomes{i}))
             id_outcome(i) = regexp(cc.Outcomes{i},'№\d*.\d','match');
         end
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
+        append(r,te);
+        append(t,r); 
+        
+        r = TableRow;
+        r.Style = [r.Style,bodyStyle];
+        te = TableEntry('课程培养学生的能力（教学目标）');
+        append(r,te);
+        if isempty(cc.Objectives)
+            cc.Objectives = cellstr(string(1:length(cc.Outcomes)));
+        end
         id_objective = cell(length(cc.Objectives),1);
+        te = TableEntry;
         for i = 1:length(cc.Objectives)
-            append(doc,Paragraph(cc.Objectives{i}));
+            append(te,Paragraph(cc.Objectives{i}))
             id_objective(i) = {sprintf('[o%d]',i)};
         end
         % 课程目标与毕业要求指标点的关系矩阵
-        append(doc,Paragraph("课程目标与毕业要求的支撑关系如下表所列："));
+        append(te,Paragraph("课程目标与毕业要求的支撑关系如下表所列："));
         ctab1 = cell(length(id_outcome)+1,length(id_objective)+1);
         ctab1{1,1} = '毕业要求指标点';
         ctab1(1,2:end) = id_objective;
         ctab1(2:end,1) = id_outcome;
         ctab1(2:end,2:end) = num2cell(eye(length(id_outcome)));
         t1 = Tab2Worda(ctab1(2:end,:),'关系矩阵表','关系矩阵表',ctab1(1,:));
-        append(doc,t1);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        for i = 1:length(cc.Description)
-            append(doc,Paragraph(cc.Description{i}));
-        end
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        for i = 1:length(cc.Content)
-            append(doc,Paragraph(cc.Content{i}));
-        end
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        for i = 1:length(cc.ExpTeach)
-            append(doc,Paragraph(cc.ExpTeach{i}));
-        end
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        for i = 1:length(cc.TeachMethod)
-            append(doc,Paragraph(cc.TeachMethod{i}));
-        end
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        for i = 1:length(cc.ExamMethod)
-            append(doc,Paragraph(cc.ExamMethod{i}));
-        end
-        append(doc,Paragraph("课程目标评价标准如下表所列："));
-        t2head = {'课程目标','优秀','良好','中等','合格','不合格'};
-        t2 = Tab2Worda(cc.Benchmark,'关系矩阵表','关系矩阵表',t2head);
-        append(doc,t2);
-
-        holeId = moveToNextHole(doc); 
-        fprintf('Current hole ID: %s\n', holeId);
-        for i = 1:length(cc.Textbook)
-            append(doc,Paragraph(cc.Textbook{i}));
-        end
+        append(te,t1);
+        append(r,te);
+        append(t,r); 
         
-        holeId = moveToNextHole(doc);
-        fprintf('Current hole ID: %s\n', holeId);
-        append(doc,Paragraph(flag));
+        r = TableRow;
+        r.Style = [r.Style,bodyStyle];
+        te = TableEntry('课程简介');
+        append(r,te);
+        te = TableEntry;
+        for i = 1:length(cc.Description)
+            append(te,Paragraph(cc.Description{i}))
+        end
+        append(r,te);
+        append(t,r); 
+        
+        r = TableRow;
+        r.Style = [r.Style,bodyStyle];
+        te = TableEntry('教学内容与学时分配');
+        append(r,te);
+        te = TableEntry;
+        for i = 1:length(cc.Content)
+            append(te,Paragraph(cc.Content{i}))
+        end
+        append(r,te);
+        append(t,r); 
+
+        r = TableRow;
+        r.Style = [r.Style,bodyStyle];
+        te = TableEntry('实验教学（包括上机学时、实验学时、实践学时）');
+        append(r,te);
+        te = TableEntry;
+        for i = 1:length(cc.ExpTeach)
+            append(te,Paragraph(cc.ExpTeach{i}))
+        end
+        append(r,te);
+        append(t,r); 
+        
+        r = TableRow;
+        r.Style = [r.Style,bodyStyle];
+        te = TableEntry('教学方法');
+        append(r,te);
+        te = TableEntry;
+        for i = 1:length(cc.TeachMethod)
+            append(te,Paragraph(cc.TeachMethod{i}))
+        end
+        append(r,te);
+        append(t,r);
+        
+        r = TableRow;
+        r.Style = [r.Style,bodyStyle];
+        te = TableEntry('考核方式');
+        append(r,te);
+        te = TableEntry;
+        for i = 1:length(cc.ExamMethod)
+            append(te,Paragraph(cc.ExamMethod{i}))
+        end
+        if ~isempty(cc.Benchmark)
+            append(te,Paragraph("课程目标评价标准如下表所列："));
+            t2head = {'课程目标', '优秀（>0.90）', '良好（0.80~0.89）', ...
+                '中等（0.70~0.79）', '合格（0.60~0.69）', '不合格（<0.60）'};
+            t2 = Tab2Worda(cc.Benchmark,'评价标准表','课程目标评价标准',t2head);
+            append(te,t2);
+        end
+        append(r,te);
+        append(t,r); 
+        
+        r = TableRow;
+        r.Style = [r.Style,bodyStyle];
+        te = TableEntry('教材及参考资料');
+        append(r,te);
+        te = TableEntry;
+        for i = 1:length(cc.Textbook)
+            append(te,Paragraph(cc.Textbook{i}))
+        end
+        append(r,te);
+        append(t,r);
+
+        r = TableRow;
+        r.Style = [r.Style,bodyStyle];
+        te = TableEntry('制定人及制定时间');
+        append(r,te);
+        te = TableEntry;
+        append(te,Paragraph(flag))
+        append(r,te);
+        append(t,r);
+
+        append(doc,t);
 
         close(doc);
         

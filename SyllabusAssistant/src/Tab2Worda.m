@@ -114,6 +114,14 @@ function Grps = GetTabWidth(type, NCol)
     Grps = TableColSpecGroup;
     Grps.Span = NCol;    
     switch type
+        case('评价标准表')
+            TabSpecs(1) = TableColSpec;
+            TabSpecs(1).Span = 1;
+            TabSpecs(1).Style = {Width("10%")};
+            TabSpecs(2) = TableColSpec;
+            TabSpecs(2).Span = NCol-1;
+            ColWidth = strcat(string(round(0.9/(NCol-1),3)*100),"%");
+            TabSpecs(2).Style = {Width(ColWidth)};            
         case('关系矩阵表')
             TabSpecs(1) = TableColSpec;
             TabSpecs(1).Span = 1;
