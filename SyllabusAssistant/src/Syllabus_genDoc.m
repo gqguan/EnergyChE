@@ -54,7 +54,7 @@ if nargin == 2
             textObj = "选修";
         end
         c(:,1) = {'课程代码';'课程名称';'英文名称';'课程类别';'课程性质';...
-            '学时';'学分';'开课学期';'开课单位';'适用专业';'授课语言'};
+            '课程时间';'学分';'开课学期';'开课单位';'适用专业';'授课语言'};
         c(:,2) = {cc.Code;cc.Title;'';cc.Category;textObj;cc.ClassHour;...
             cc.Credits;cc.Semester;'化学与化工学院';'能源化学工程';cc.Language};
         for iRow = 1:11
