@@ -114,6 +114,25 @@ function Grps = GetTabWidth(type, NCol)
     Grps = TableColSpecGroup;
     Grps.Span = NCol;    
     switch type
+        case('实验教学内容表')
+            TabSpecs(1) = TableColSpec;
+            TabSpecs(1).Span = 1;
+            TabSpecs(1).Style = {Width('7.5%')};
+            TabSpecs(2) = TableColSpec;
+            TabSpecs(2).Span = 1;
+            TabSpecs(2).Style = {Width('20%')};
+            TabSpecs(3) = TableColSpec;
+            TabSpecs(3).Span = 1;
+            TabSpecs(3).Style = {Width('7.5%')};
+            TabSpecs(4) = TableColSpec;
+            TabSpecs(4).Span = 1;
+            TabSpecs(4).Style = {Width('20%')};
+            TabSpecs(5) = TableColSpec;
+            TabSpecs(5).Span = 3;
+            TabSpecs(5).Style = {Width('10%')};
+            TabSpecs(6) = TableColSpec;
+            TabSpecs(6).Span = 1;
+            TabSpecs(6).Style = {Width('15%')};
         case('评价标准表')
             TabSpecs(1) = TableColSpec;
             TabSpecs(1).Span = 1;

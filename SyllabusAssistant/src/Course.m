@@ -18,12 +18,15 @@ classdef Course
         Objectives = {}
         Description = ""
         Content = ""
+        ExpDetail = {}
         ExpTeach = ""
         TeachMethod = ""
         ExamMethod = ""
         Benchmark = {}
+        Notices = ""
         Textbook = ""
         FilePath = ""
+        LogInfo = ""
     end
     
     methods

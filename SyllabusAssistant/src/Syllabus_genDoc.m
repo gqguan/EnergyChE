@@ -82,7 +82,7 @@ if nargin == 2
         id_outcome = cell(length(cc.Outcomes),1);
         te = TableEntry;
         for i = 1:length(cc.Outcomes)
-            append(te,Paragraph(cc.Outcomes{i}))
+            append(te,Paragraph(cc.Outcomes{i}));
             id_outcome(i) = regexp(cc.Outcomes{i},'№\d*.\d','match');
         end
         append(r,te);
@@ -98,7 +98,7 @@ if nargin == 2
         id_objective = cell(length(cc.Objectives),1);
         te = TableEntry;
         for i = 1:length(cc.Objectives)
-            append(te,Paragraph(cc.Objectives{i}))
+            append(te,Paragraph(cc.Objectives{i}));
             id_objective(i) = {sprintf('[o%d]',i)};
         end
         % 课程目标与毕业要求指标点的关系矩阵
@@ -119,51 +119,111 @@ if nargin == 2
         append(r,te);
         te = TableEntry;
         for i = 1:length(cc.Description)
-            append(te,Paragraph(cc.Description{i}))
+            append(te,Paragraph(cc.Description{i}));
         end
         append(r,te);
         append(t,r); 
         
-        r = TableRow;
-        r.Style = [r.Style,bodyStyle];
-        te = TableEntry('教学内容与学时分配');
-        append(r,te);
-        te = TableEntry;
-        for i = 1:length(cc.Content)
-            append(te,Paragraph(cc.Content{i}))
+        switch cc.Category
+            case('集中实践教学')
+                r = TableRow;
+                r.Style = [r.Style,bodyStyle];
+                te = TableEntry('教学内容');
+                append(r,te);
+                te = TableEntry;
+                for i = 1:length(cc.Content)
+                    append(te,Paragraph(cc.Content{i}));
+                end
+                append(r,te);
+                append(t,r); 
+                %
+                r = TableRow;
+                r.Style = [r.Style,bodyStyle];
+                te = TableEntry('实习方式');
+                append(r,te);
+                te = TableEntry;
+                for i = 1:length(cc.ExpTeach)
+                    append(te,Paragraph(cc.ExpTeach{i}));
+                end
+                append(r,te);
+                append(t,r); 
+                %
+                r = TableRow;
+                r.Style = [r.Style,bodyStyle];
+                te = TableEntry('实习地点');
+                append(r,te);
+                te = TableEntry;
+                for i = 1:length(cc.TeachMethod)
+                    append(te,Paragraph(cc.TeachMethod{i}));
+                end
+                append(r,te);
+                append(t,r);
+            otherwise
+                if ~isempty(regexp(cc.Title,'实验','once'))
+                    r = TableRow;
+                    r.Style = [r.Style,bodyStyle];
+                    te = TableEntry('实验教学（包括上机学时、实验学时、实践学时）');
+                    append(r,te);
+                    te = TableEntry;
+                    for i = 1:length(cc.ExpTeach)
+                        append(te,Paragraph(cc.ExpTeach{i}));
+                    end
+                    append(r,te);
+                    append(t,r); 
+                    %
+                    r = TableRow;
+                    r.Style = [r.Style,bodyStyle];
+                    te = TableEntry('教学方法');
+                    append(r,te);
+                    te = TableEntry;
+                    for i = 1:length(cc.TeachMethod)
+                        append(te,Paragraph(cc.TeachMethod{i}));
+                    end
+                    append(r,te);
+                    append(t,r);
+                else
+                    r = TableRow;
+                    r.Style = [r.Style,bodyStyle];
+                    te = TableEntry('教学内容与学时分配');
+                    append(r,te);
+                    te = TableEntry;
+                    for i = 1:length(cc.Content)
+                        append(te,Paragraph(cc.Content{i}));
+                    end
+                    append(r,te);
+                    append(t,r); 
+                    %
+                    r = TableRow;
+                    r.Style = [r.Style,bodyStyle];
+                    te = TableEntry('实验教学（包括上机学时、实验学时、实践学时）');
+                    append(r,te);
+                    te = TableEntry;
+                    for i = 1:length(cc.ExpTeach)
+                        append(te,Paragraph(cc.ExpTeach{i}));
+                    end
+                    append(r,te);
+                    append(t,r); 
+                    %
+                    r = TableRow;
+                    r.Style = [r.Style,bodyStyle];
+                    te = TableEntry('教学方法');
+                    append(r,te);
+                    te = TableEntry;
+                    for i = 1:length(cc.TeachMethod)
+                        append(te,Paragraph(cc.TeachMethod{i}));
+                    end
+                    append(r,te);
+                    append(t,r);
+                end
         end
-        append(r,te);
-        append(t,r); 
-
-        r = TableRow;
-        r.Style = [r.Style,bodyStyle];
-        te = TableEntry('实验教学（包括上机学时、实验学时、实践学时）');
-        append(r,te);
-        te = TableEntry;
-        for i = 1:length(cc.ExpTeach)
-            append(te,Paragraph(cc.ExpTeach{i}))
-        end
-        append(r,te);
-        append(t,r); 
-        
-        r = TableRow;
-        r.Style = [r.Style,bodyStyle];
-        te = TableEntry('教学方法');
-        append(r,te);
-        te = TableEntry;
-        for i = 1:length(cc.TeachMethod)
-            append(te,Paragraph(cc.TeachMethod{i}))
-        end
-        append(r,te);
-        append(t,r);
-        
+      
         r = TableRow;
         r.Style = [r.Style,bodyStyle];
         te = TableEntry('考核方式');
         append(r,te);
         te = TableEntry;
         for i = 1:length(cc.ExamMethod)
-            append(te,Paragraph(cc.ExamMethod{i}))
+            append(te,Paragraph(cc.ExamMethod{i}));
         end
         if ~isempty(cc.Benchmark)
             append(te,Paragraph("课程目标评价标准如下表所列："));
@@ -171,9 +231,21 @@ if nargin == 2
                 '中等（0.70~0.79）', '合格（0.60~0.69）', '不合格（<0.60）'};
             t2 = Tab2Worda(cc.Benchmark,'评价标准表','课程目标评价标准',t2head);
             append(te,t2);
+            append(te,Paragraph(''));
         end
         append(r,te);
         append(t,r); 
+        
+        if isequal(cc.Category,'集中实践教学')
+            r = TableRow;
+            r.Style = [r.Style,bodyStyle];
+            te = TableEntry('实习注意事项');
+            append(r,te);
+            te = TableEntry;
+            for i = 1:length(cc.Notices)
+                append(te,Paragraph(cc.Notices{i}));
+            end            
+        end
         
         r = TableRow;
         r.Style = [r.Style,bodyStyle];
@@ -181,7 +253,7 @@ if nargin == 2
         append(r,te);
         te = TableEntry;
         for i = 1:length(cc.Textbook)
-            append(te,Paragraph(cc.Textbook{i}))
+            append(te,Paragraph(cc.Textbook{i}));
         end
         append(r,te);
         append(t,r);
@@ -191,11 +263,24 @@ if nargin == 2
         te = TableEntry('制定人及制定时间');
         append(r,te);
         te = TableEntry;
-        append(te,Paragraph(flag))
+        append(te,Paragraph(flag));
         append(r,te);
         append(t,r);
-
+        
         append(doc,t);
+        
+        % 实验课程教纲中表列实验内容和学时明细
+        if ~isempty(regexp(cc.Title,'实验','once'))
+            append(doc,PageBreak());
+            p3 = Paragraph(sprintf('《%s》实验教学内容与学时分配'));
+            p3.Style = headStyle;
+            append(doc,p3);
+            t3head = {'编号', '实验项目名称', '学时', '实验内容提要', ...
+                '实验类型', '实验要求', '每组人数', '主要仪器设备与软件'};
+            t3 = Tab2Worda(cc.ExpDetail,'实验教学内容表','课程目标评价标准',t3head);
+            append(doc,t3);
+            append(doc,Paragraph(''));
+        end
 
         close(doc);
         
