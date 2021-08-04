@@ -25,6 +25,14 @@ bodyStyle = {VAlign('middle'), OuterMargin('0pt', '0pt', '0pt', '0pt'), ...
 if nargin == 2
     if isequal(class(cc),'Course')
         doc = Document(cc.FilePath,'docx');
+        % default page layout is portrait
+        portraitPLO = DOCXPageLayout;
+        portraitPageSize = portraitPLO.PageSize;
+        % define landscape layout
+        landscapePLO = DOCXPageLayout;
+        landscapePLO.PageSize.Orientation = "landscape";
+        landscapePLO.PageSize.Height = portraitPageSize.Width;
+        landscapePLO.PageSize.Width = portraitPageSize.Height;
         % 教纲标题
         p = Paragraph(sprintf('《%s》教学大纲',cc.Title));
         p.Style = headStyle;
@@ -44,7 +52,7 @@ if nargin == 2
         TabSpecs(2).Style = {Width("85%")};        
         Grps.ColSpecs = TabSpecs;
         t.ColSpecGroups = [t.ColSpecGroups,Grps];
-        
+
         % 第1-11行
         % 教纲内容胞矩阵
         c = cell(11,2);
@@ -271,14 +279,15 @@ if nargin == 2
         
         % 实验课程教纲中表列实验内容和学时明细
         if ~isempty(regexp(cc.Title,'实验','once'))
-            append(doc,PageBreak());
-            p3 = Paragraph(sprintf('《%s》实验教学内容与学时分配'));
+            append(doc,clone(landscapePLO));
+            p3 = Paragraph(sprintf('《%s》实验教学内容与学时分配',cc.Title));
             p3.Style = headStyle;
             append(doc,p3);
             t3head = {'编号', '实验项目名称', '学时', '实验内容提要', ...
                 '实验类型', '实验要求', '每组人数', '主要仪器设备与软件'};
             t3 = Tab2Worda(cc.ExpDetail,'实验教学内容表','课程目标评价标准',t3head);
             append(doc,t3);
+            
             append(doc,Paragraph(''));
         end
 
