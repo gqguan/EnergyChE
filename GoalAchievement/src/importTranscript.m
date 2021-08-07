@@ -1,4 +1,4 @@
-function [outTab,evalWays] = importTranscript(filePath)
+function [outTab,evalWays,FullValues] = importTranscript(filePath)
 % 导入成绩单
 %   
 % 输入参数检查
@@ -82,12 +82,14 @@ end
 j = 1;
 Descriptions = repmat(string,1,size(sMat,2));
 VarNames = repmat(string,1,size(sMat,2));
+FullValues = zeros(1,size(sMat,2));
 st = struct;
 for iW = 1:length(evalWays)
     for iQ = 1:length(evalWays(iW).Questions)
         for iP = 1:length(evalWays(iW).Questions(iQ).Part)
             Descriptions(j) = evalWays(iW).Questions(iQ).Part(iP).Description;
             VarNames(j) = evalWays(iW).Questions(iQ).Part(iP).VarName;
+            FullValues(j) = evalWays(iW).Questions(iQ).Part(iP).FullValue;
             st.(VarNames(j)) = sMat(:,j);
             j = j+1;
         end

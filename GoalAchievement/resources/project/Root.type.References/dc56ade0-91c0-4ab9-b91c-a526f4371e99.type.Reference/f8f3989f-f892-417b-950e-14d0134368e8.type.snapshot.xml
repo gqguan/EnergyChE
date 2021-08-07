@@ -1,0 +1,292 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Info>
+    <MetadataNode>
+        <path value="ProjectData:type:Info">
+            <node name="Info">
+                <entry value="SyllabusAssistant" key="Name" />
+            </node>
+        </path>
+        <path value="Root:type:Categories">
+            <path value="FileClassCategory:type:Category">
+                <node name="Info">
+                    <entry value="None" key="DataType" />
+                    <entry value="分类" key="Name" />
+                    <entry value="1" key="ReadOnly" />
+                    <entry value="1" key="SingleValued" />
+                </node>
+                <path value="artifact:type:Label">
+                    <node name="Info">
+                        <entry value="工件" key="Name" />
+                        <entry value="READ_ONLY" key="ReadOnly" />
+                    </node>
+                </path>
+                <path value="convenience:type:Label">
+                    <node name="Info">
+                        <entry value="便利" key="Name" />
+                        <entry value="READ_ONLY" key="ReadOnly" />
+                    </node>
+                </path>
+                <path value="derived:type:Label">
+                    <node name="Info">
+                        <entry value="派生" key="Name" />
+                        <entry value="READ_ONLY" key="ReadOnly" />
+                    </node>
+                </path>
+                <path value="design:type:Label">
+                    <node name="Info">
+                        <entry value="设计" key="Name" />
+                        <entry value="READ_ONLY" key="ReadOnly" />
+                    </node>
+                </path>
+                <path value="none:type:Label">
+                    <node name="Info">
+                        <entry value="无" key="Name" />
+                        <entry value="READ_ONLY" key="ReadOnly" />
+                    </node>
+                </path>
+                <path value="other:type:Label">
+                    <node name="Info">
+                        <entry value="其他" key="Name" />
+                        <entry value="READ_ONLY" key="ReadOnly" />
+                    </node>
+                </path>
+                <path value="test:type:Label">
+                    <node name="Info">
+                        <entry value="测试" key="Name" />
+                        <entry value="READ_ONLY" key="ReadOnly" />
+                    </node>
+                </path>
+            </path>
+        </path>
+        <path value="Root:type:EntryPoints" />
+        <path value="Root:type:Extensions" />
+        <path value="Root:type:Files">
+            <path value="dat:type:File">
+                <node name="Info" />
+                <path value="1:type:DIR_SIGNIFIER">
+                    <node name="Info" />
+                </path>
+                <path value="app.mat:type:File">
+                    <node name="Info">
+                        <node name="Category">
+                            <entry value="FileClassCategory" key="UUID" />
+                            <node name="Label">
+                                <entry value="design" key="UUID" />
+                            </node>
+                        </node>
+                    </node>
+                </path>
+                <path value="database.mat:type:File">
+                    <node name="Info">
+                        <node name="Category">
+                            <entry value="FileClassCategory" key="UUID" />
+                            <node name="Label">
+                                <entry value="design" key="UUID" />
+                            </node>
+                        </node>
+                    </node>
+                </path>
+            </path>
+            <path value="msc:type:File">
+                <node name="Info" />
+                <path value="1:type:DIR_SIGNIFIER">
+                    <node name="Info" />
+                </path>
+                <path value="bedge_small.png:type:File">
+                    <node name="Info" />
+                </path>
+            </path>
+            <path value="res:type:File">
+                <node name="Info" />
+                <path value="1:type:DIR_SIGNIFIER">
+                    <node name="Info" />
+                </path>
+                <path value="Syllabus_genDoc_UI_main.mlapp:type:File">
+                    <node name="Info">
+                        <node name="Category">
+                            <entry value="FileClassCategory" key="UUID" />
+                            <node name="Label">
+                                <entry value="design" key="UUID" />
+                            </node>
+                        </node>
+                    </node>
+                </path>
+                <path value="syllabus.dotx:type:File">
+                    <node name="Info" />
+                </path>
+            </path>
+            <path value="src:type:File">
+                <node name="Info" />
+                <path value="1:type:DIR_SIGNIFIER">
+                    <node name="Info" />
+                </path>
+                <path value="Course.m:type:File">
+                    <node name="Info">
+                        <node name="Category">
+                            <entry value="FileClassCategory" key="UUID" />
+                            <node name="Label">
+                                <entry value="design" key="UUID" />
+                            </node>
+                        </node>
+                    </node>
+                </path>
+                <path value="DataHash.m:type:File">
+                    <node name="Info">
+                        <node name="Category">
+                            <entry value="FileClassCategory" key="UUID" />
+                            <node name="Label">
+                                <entry value="design" key="UUID" />
+                            </node>
+                        </node>
+                    </node>
+                </path>
+                <path value="Syllabus_genDoc.m:type:File">
+                    <node name="Info">
+                        <node name="Category">
+                            <entry value="FileClassCategory" key="UUID" />
+                            <node name="Label">
+                                <entry value="design" key="UUID" />
+                            </node>
+                        </node>
+                    </node>
+                </path>
+                <path value="Tab2Worda.m:type:File">
+                    <node name="Info">
+                        <node name="Category">
+                            <entry value="FileClassCategory" key="UUID" />
+                            <node name="Label">
+                                <entry value="design" key="UUID" />
+                            </node>
+                        </node>
+                    </node>
+                </path>
+                <path value="cprintf.m:type:File">
+                    <node name="Info">
+                        <node name="Category">
+                            <entry value="FileClassCategory" key="UUID" />
+                            <node name="Label">
+                                <entry value="design" key="UUID" />
+                            </node>
+                        </node>
+                    </node>
+                </path>
+            </path>
+        </path>
+        <path value="Root:type:ProjectData" />
+        <path value="Root:type:ProjectPath">
+            <path value="2277d8d5-d1f5-4465-a1be-57b55a6f8cbd:type:Reference">
+                <node name="Info">
+                    <entry value="msc" key="Ref" />
+                    <entry value="Relative" key="Type" />
+                </node>
+            </path>
+            <path value="4ff29987-e5a0-4383-9463-1f8edb381c2e:type:Reference">
+                <node name="Info">
+                    <entry value="res" key="Ref" />
+                    <entry value="Relative" key="Type" />
+                </node>
+            </path>
+            <path value="a1e2c20b-ca1f-40ea-ad90-c3660bea10c0:type:Reference">
+                <node name="Info">
+                    <entry value="dat" key="Ref" />
+                    <entry value="Relative" key="Type" />
+                </node>
+            </path>
+            <path value="e2e3b785-aaed-4699-8e72-187819a66b03:type:Reference">
+                <node name="Info">
+                    <entry value="src" key="Ref" />
+                    <entry value="Relative" key="Type" />
+                </node>
+            </path>
+            <path value="e61bd417-9204-451b-b874-5fd3fb955a9d:type:Reference">
+                <node name="Info">
+                    <entry value="out" key="Ref" />
+                    <entry value="Relative" key="Type" />
+                </node>
+            </path>
+        </path>
+    </MetadataNode>
+    <Files>
+        <File path="SyllabusAssistant.prj" value="fe84b66d" />
+        <File path="dat/app.mat" value="232c3915" />
+        <File path="dat/database.mat" value="af30cc28" />
+        <File path="dat" value="-1" />
+        <File path="msc/bedge_small.png" value="16531267" />
+        <File path="msc" value="-1" />
+        <File path="out/PackagingLog.html" value="2b27adc5" />
+        <File path="out/SyllabusAssistant.ctf" value="1e954a1c" />
+        <File path="out/mccExcludedFiles.log" value="982cc5c2" />
+        <File path="out/release/SyllabusAssistant_v1.10.ctf" value="88a94574" />
+        <File path="out/release/SyllabusAssistant_v1.6.ctf" value="7c534418" />
+        <File path="out/release" value="-1" />
+        <File path="out/requiredMCRProducts.txt" value="1b9283e1" />
+        <File path="out" value="-1" />
+        <File path="res/SyllabusAssistant.prj" value="69a28880" />
+        <File path="res/SyllabusAssistant/PackagingLog.html" value="21a0163a" />
+        <File path="res/SyllabusAssistant/SyllabusAssistant.ctf" value="91889ee5" />
+        <File path="res/SyllabusAssistant/mccExcludedFiles.log" value="982cc5c2" />
+        <File path="res/SyllabusAssistant/requiredMCRProducts.txt" value="1b9283e1" />
+        <File path="res/SyllabusAssistant" value="-1" />
+        <File path="res/Syllabus_genDoc_UI_main.mlapp" value="8fe2c843" />
+        <File path="res/syllabus.dotx" value="e6f5a1b6" />
+        <File path="res/操作手册.docx" value="6bdd5c25" />
+        <File path="res/操作说明.pptx" value="49566115" />
+        <File path="res/教纲生成器演示视频.m4v" value="55d7f981" />
+        <File path="resources/project/Project.xml" value="c576b26a" />
+        <File path="resources/project/ProjectData.type.Info.xml" value="60265a8" />
+        <File path="resources/project/Root.type.Categories/FileClassCategory.type.Category.xml" value="9d8c7e6a" />
+        <File path="resources/project/Root.type.Categories/FileClassCategory.type.Category/artifact.type.Label.xml" value="ecde80d6" />
+        <File path="resources/project/Root.type.Categories/FileClassCategory.type.Category/convenience.type.Label.xml" value="84ed0eb4" />
+        <File path="resources/project/Root.type.Categories/FileClassCategory.type.Category/derived.type.Label.xml" value="1476ca66" />
+        <File path="resources/project/Root.type.Categories/FileClassCategory.type.Category/design.type.Label.xml" value="7ee960ff" />
+        <File path="resources/project/Root.type.Categories/FileClassCategory.type.Category/none.type.Label.xml" value="ce18464" />
+        <File path="resources/project/Root.type.Categories/FileClassCategory.type.Category/other.type.Label.xml" value="dfec714e" />
+        <File path="resources/project/Root.type.Categories/FileClassCategory.type.Category/test.type.Label.xml" value="1c651c1a" />
+        <File path="resources/project/Root.type.Categories/FileClassCategory.type.Category" value="-1" />
+        <File path="resources/project/Root.type.Categories" value="-1" />
+        <File path="resources/project/Root.type.EntryPoints" value="-1" />
+        <File path="resources/project/Root.type.Extensions" value="-1" />
+        <File path="resources/project/Root.type.Files/dat.type.File.xml" value="3af507e" />
+        <File path="resources/project/Root.type.Files/dat.type.File/1.type.DIR_SIGNIFIER.xml" value="3af507e" />
+        <File path="resources/project/Root.type.Files/dat.type.File/app.mat.type.File.xml" value="df0217e1" />
+        <File path="resources/project/Root.type.Files/dat.type.File/database.mat.type.File.xml" value="df0217e1" />
+        <File path="resources/project/Root.type.Files/dat.type.File" value="-1" />
+        <File path="resources/project/Root.type.Files/msc.type.File.xml" value="3af507e" />
+        <File path="resources/project/Root.type.Files/msc.type.File/1.type.DIR_SIGNIFIER.xml" value="3af507e" />
+        <File path="resources/project/Root.type.Files/msc.type.File/bedge_small.png.type.File.xml" value="3af507e" />
+        <File path="resources/project/Root.type.Files/msc.type.File" value="-1" />
+        <File path="resources/project/Root.type.Files/res.type.File.xml" value="3af507e" />
+        <File path="resources/project/Root.type.Files/res.type.File/1.type.DIR_SIGNIFIER.xml" value="3af507e" />
+        <File path="resources/project/Root.type.Files/res.type.File/Syllabus_genDoc_UI_main.mlapp.type.File.xml" value="df0217e1" />
+        <File path="resources/project/Root.type.Files/res.type.File/syllabus.dotx.type.File.xml" value="3af507e" />
+        <File path="resources/project/Root.type.Files/res.type.File" value="-1" />
+        <File path="resources/project/Root.type.Files/src.type.File.xml" value="3af507e" />
+        <File path="resources/project/Root.type.Files/src.type.File/1.type.DIR_SIGNIFIER.xml" value="3af507e" />
+        <File path="resources/project/Root.type.Files/src.type.File/Course.m.type.File.xml" value="df0217e1" />
+        <File path="resources/project/Root.type.Files/src.type.File/DataHash.m.type.File.xml" value="df0217e1" />
+        <File path="resources/project/Root.type.Files/src.type.File/Syllabus_genDoc.m.type.File.xml" value="df0217e1" />
+        <File path="resources/project/Root.type.Files/src.type.File/Tab2Worda.m.type.File.xml" value="df0217e1" />
+        <File path="resources/project/Root.type.Files/src.type.File/cprintf.m.type.File.xml" value="df0217e1" />
+        <File path="resources/project/Root.type.Files/src.type.File" value="-1" />
+        <File path="resources/project/Root.type.Files" value="-1" />
+        <File path="resources/project/Root.type.ProjectData" value="-1" />
+        <File path="resources/project/Root.type.ProjectPath/2277d8d5-d1f5-4465-a1be-57b55a6f8cbd.type.Reference.xml" value="9eedb903" />
+        <File path="resources/project/Root.type.ProjectPath/4ff29987-e5a0-4383-9463-1f8edb381c2e.type.Reference.xml" value="797de6ea" />
+        <File path="resources/project/Root.type.ProjectPath/a1e2c20b-ca1f-40ea-ad90-c3660bea10c0.type.Reference.xml" value="a0830784" />
+        <File path="resources/project/Root.type.ProjectPath/e2e3b785-aaed-4699-8e72-187819a66b03.type.Reference.xml" value="65c46ad3" />
+        <File path="resources/project/Root.type.ProjectPath/e61bd417-9204-451b-b874-5fd3fb955a9d.type.Reference.xml" value="2389a4de" />
+        <File path="resources/project/Root.type.ProjectPath" value="-1" />
+        <File path="resources/project/uuid-e6bbd3c0-a3a0-47ab-8ebf-9498175764d0.xml" value="3af507e" />
+        <File path="resources/project" value="-1" />
+        <File path="resources" value="-1" />
+        <File path="res" value="-1" />
+        <File path="src/Course.m" value="e839203e" />
+        <File path="src/DataHash.m" value="21c347dc" />
+        <File path="src/Syllabus_genDoc.m" value="a750914a" />
+        <File path="src/Tab2Worda.m" value="f8eb23a2" />
+        <File path="src/cprintf.m" value="e72c1d48" />
+        <File path="src/test.m" value="9ebdedf9" />
+        <File path="src" value="-1" />
+    </Files>
+    <Date value="2021年8月6日 16:31:37" />
+</Info>
