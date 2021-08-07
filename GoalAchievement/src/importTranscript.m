@@ -1,7 +1,18 @@
-function [outTab,evalWays,FullValues] = importTranscript(filePath)
+function [out,prompt] = importTranscript(course,filePath)
 % 导入成绩单
 %   
 % 输入参数检查
+if exist('course','var') == 0
+    warning('函数importTranscript()未指定课程名称作为输入参数1！')
+    return
+else
+    if isa(course,'string') || isa(course,'char')
+        out = Transcript(course);
+    else
+        warning('函数importTranscript()输出参数1类型有误！')
+        return
+    end
+end
 if exist('filePath','var') == 0
     [file,path] = uigetfile('*.xlsx','multiselect','off');
     filePath = [path,file];
@@ -9,12 +20,13 @@ end
 LOT = char(65:65+25);
 iLetter1 = 1;
 raw = readcell(filePath);
+prompt = sprintf('导入文件%s',filePath);
 % 学生成绩明细
 raw0 = raw(5:end,5:end);
 raw0(cellfun(@(x)~isnumeric(x),raw0)) = {nan};
 sMat = cellfun(@(x)double(x),raw0);
 % 学生信息
-Class = raw(5:end,1); % 班级
+Class = categorical(raw(5:end,1)); % 班级
 SN = raw(5:end,2); % 学号
 Name = raw(5:end,3); % 姓名
 % 评测方式
@@ -97,7 +109,9 @@ for iW = 1:length(evalWays)
 end
 tab = struct2table(st);
 tab.Properties.VariableDescriptions = Descriptions;
-outTab = [table(Class,SN,Name),tab];
+% 输出
+out.Detail = [table(Class,SN,Name),tab];
+out.Definition = evalWays;
 
 end
 
