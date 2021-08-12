@@ -35,7 +35,6 @@ if ~isequal(size(cc.Outcomes),size(GAresult))
     warning('课程对象中属性Outcomes的尺寸与GAresults不符！')
     return
 end
-%
 Name = cc.Title;
 NumReq = length(cc.Outcomes);
 %
