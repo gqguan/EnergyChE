@@ -14,7 +14,7 @@ else
     end
 end
 if exist('filePath','var') == 0
-    [file,path] = uigetfile('*.xlsx','multiselect','off');
+    [file,path] = uigetfile('*.xlsx','multiselect','off','导入成绩单Excel文件');
     filePath = [path,file];
 end
 LOT = char(65:65+25);
@@ -112,6 +112,7 @@ tab.Properties.VariableDescriptions = Descriptions;
 % 输出
 out.Detail = [table(Class,SN,Name),tab];
 out.Definition = evalWays;
+prompt = sprintf('%s内含%s',prompt,out.Info);
 
 end
 
