@@ -13,6 +13,7 @@ classdef Transcript
         Descriptions % 成绩单中打分项说明
         VarNames % 成绩单中打分项代号
         SubPoints double % 成绩单分值向量
+        Weights double % 评测项权重向量
         Remark % 达成度分析文本
     end
     

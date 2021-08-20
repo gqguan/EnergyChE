@@ -31,6 +31,9 @@ mainHeaderRowStyle = {HAlign('center'), VAlign('middle'), InnerMargin('2pt', '2p
 fileName = sprintf('《%s》课程目标达成度分析报告（%s）.docx',cc.Title,tr.Class);
 [file1,filePath] = uiputfile(fileName,'保存达成度分析报告');
 doc = Document([filePath,file1],'docx');
+if exist('figPath','var') == 0
+    figPath = filePath;
+end
 % default page layout is portrait
 portraitPLO = DOCXPageLayout;
 portraitPageSize = portraitPLO.PageSize;
@@ -55,19 +58,19 @@ Grps.Span = NCol;
 % 第1-2列宽度
 TabSpecs(1) = TableColSpec;
 TabSpecs(1).Span = 2;
-TabSpecs(1).Style = {Width("25%")};
+TabSpecs(1).Style = {Width("15%")};
 % 第3列宽度
 TabSpecs(2) = TableColSpec;
 TabSpecs(2).Span = 1;
-TabSpecs(2).Style = {Width("13%")};
+TabSpecs(2).Style = {Width("10%")};
 % 第4列宽度
 TabSpecs(3) = TableColSpec;
 TabSpecs(3).Span = 1;
-TabSpecs(3).Style = {Width("7%")};
+TabSpecs(3).Style = {Width("20%")};
 % 第5-9列（合计6列）
 TabSpecs(4) = TableColSpec;
 TabSpecs(4).Span = 5;
-TabSpecs(4).Style = {Width("6%")}; 
+TabSpecs(4).Style = {Width("8%")}; 
 Grps.ColSpecs = TabSpecs;
 t.ColSpecGroups = [t.ColSpecGroups,Grps];
 % 表头（课程信息第1行）
@@ -85,6 +88,7 @@ te.Style = bodyStyle;
 te.ColSpan = 6;
 append(r,te);
 append(t,r);
+
 % 表头（课程信息第2行）
 r = TableRow;
 r.Style = [r.Style,mainHeaderRowStyle];
@@ -100,6 +104,7 @@ te.Style = bodyStyle;
 te.ColSpan = 6;
 append(r,te);
 append(t,r);
+
 % 表头
 r = TableRow;
 r.Style = [r.Style,mainHeaderRowStyle];
@@ -110,72 +115,78 @@ te = TableEntry('课程教学目标');
 te.RowSpan = 2;
 append(r,te);
 te = TableEntry('达成评价途径');
-te.ColSpan = 2;
+te.ColSpan = 4;
 append(r,te);
-te = TableEntry('实际得分');
-te.ColSpan = 2;
-append(r,te);
-te = TableEntry('相对得分');
+te = TableEntry('平均成绩');
 te.ColSpan = 2;
 append(r,te);
 te = TableEntry('达成度');
 te.RowSpan = 2;
 append(r,te);
 append(t,r);
+
 r = TableRow;
 r.Style = [r.Style,mainHeaderRowStyle];
-te = TableEntry('打分点');
-append(r,te);
 te = TableEntry('评测方式');
 append(r,te);
-te = TableEntry('满分值');
-append(r,te);
-te = TableEntry('平均分');
+te = TableEntry('打分点');
 append(r,te);
 te = TableEntry('权重值');
 append(r,te);
+te = TableEntry('分值');
+append(r,te);
 te = TableEntry('得分');
+append(r,te);
+te = TableEntry('得分率');
 append(r,te);
 append(t,r);
 append(doc,t);
+
 % 达成度分析结果数据
 questionPart = saveData.Data.obj2Way.Data(:,1);
 o2w = cell2mat(saveData.Data.obj2Way.Data(:,2:end));
 GAValues = zeros(size(o2w,2),1);
 dat = cell(sum(o2w,'all'),9);
-iRow = 1;
+firstLetterAll = categorical(cellfun(@(x){x(1)},cellstr(tr.VarNames)));
+firstLetterCat = categories(firstLetterAll);
+subPoint = zeros(length(firstLetterCat),1);
+w2 = zeros(1,length(firstLetterAll));
+weight = cell2mat(saveData.Data.weight.Data(:,2:end));
+avgSubscore = mean(tr.Detail{:,4:end});
+x = mean(tr.Detail{:,4:end})./tr.SubPoints;
+row129 = 1; % 毕业要求指标点、课程目标及达成度（第1、2和9列）定位行
 for iObj = 1:size(o2w,2)
-    row1 = iRow;
-    dat{iRow,1} = cc.Outcomes{iObj};
-    dat{iRow,2} = cc.Objectives{iObj};
-%     EWLetterList = cellfun(@(x)x(1),questionPart(o2w(:,iObj)));
-    idx = find(o2w(:,iObj));
-    j0 = 0;
-    for iPart = 1:length(idx)
-        strPart = questionPart{idx(iPart)};
-        dat{iRow,3} = strPart;
-        j = char(strPart(1))-64;
-        if j ~= j0
-            dat{iRow,4} = tr.Definition(j).Name;
-            j0 = j;
+    dat{row129,1} = cc.Outcomes{iObj}; % 课程支撑的毕业要求指标点
+    dat{row129,2} = cc.Objectives{iObj}; % 课程目标
+    idx1 = logical(o2w(:,iObj))'; % 指定课程目标的全部评测项
+    row3 = row129; % 评测方式（第3列）定位行
+    for iWay = 1:length(firstLetterCat)
+        idx2 = (firstLetterAll == firstLetterCat{iWay}); % 选定某评测方式中评测项
+        idx = idx1 & idx2;
+        if any(idx)
+            dat{row3,3} = tr.Definition(iWay).Name; % 评测方式
+            row4 = row3; % 评测项（第4列）定位行
+            row4e = row4+sum(idx)-1;
+            dat(row4:row4e,4) = cellstr(tr.Descriptions(idx)); % 评测项说明
+            w1 = tr.SubPoints(idx)/sum(tr.SubPoints(idx));
+            w2(idx) = w1*weight(iWay,iObj)/sum(weight(:,iObj),'omitnan');
+            dat(row4:row4e,5) = num2cell(w2(idx)); % 评测项的权重
+            dat(row4:row4e,6) = num2cell(tr.SubPoints(idx)); % 评测项的分值
+            dat(row4:row4e,7) = num2cell(avgSubscore(idx)); % 平均分
+            dat(row4:row4e,8) = num2cell(x(idx)); % 得分率
+            row3 = row4e+1; % 更新评测项（第4列）定位行
+        else
+            subPoint(iWay) = nan;
         end
-        dat{iRow,5} = tr.SubPoints(idx(iPart));
-        var = tr.VarNames(idx(iPart));
-        dat{iRow,6} = round(mean(tr.Detail.(var)),3);
-        dat{iRow,7} = round(dat{iRow,5}/sum(tr.SubPoints(idx)),3);
-        dat{iRow,8} = round(dat{iRow,6}/dat{iRow,5}*dat{iRow,7},4);
-        iRow = iRow+1;
     end
-    GAValues(iObj) = sum(cell2mat(dat(row1:iRow-1,8)));
-    dat{row1,9} = sprintf('%.3f',GAValues(iObj));
+    dat{row129,9} = sum(w2(idx1).*x(idx1),'omitnan');
+    GAValues(iObj) = dat{row129,9};
+    row129 = row3; % 更新第1、2和9列定位行
 end
 tHead = num2cell(1:9);
 t = Tab2Worda(dat,'课程达成度分析表','课程达成度分析表',tHead);
-append(doc,t);
+
 % 达成度分析文本
-NCol = 2;
-t = Table(NCol);
-t.Style = [t.Style,tableStyle];
 r = TableRow;
 r.Style = [r.Style,bodyStyle];
 te = TableEntry('课程目标平均达成度');
@@ -185,6 +196,7 @@ te = TableEntry(p);
 te.ColSpan = 8;
 append(r,te);
 append(t,r);
+
 r = TableRow;
 r.Style = [r.Style,bodyStyle];
 te = TableEntry('课程目标达成度分析');
@@ -195,6 +207,7 @@ te.ColSpan = 8;
 append(r,te);
 append(t,r);
 append(doc,t);
+
 % 绘图
 figFile = [figPath,'GAResult.png'];
 if exist(figFile,'file') == 2
