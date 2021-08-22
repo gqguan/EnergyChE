@@ -15,6 +15,10 @@ else
 end
 if exist('filePath','var') == 0
     [file,path] = uigetfile('*.xlsx','multiselect','off','导入成绩单Excel文件');
+    if ~any([path,file]) % 当在文件选取窗中点"取消"终止函数执行
+        prompt = '';
+        return
+    end
     filePath = [path,file];
 end
 LOT = char(65:65+25);

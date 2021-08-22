@@ -117,7 +117,7 @@ append(r,te);
 te = TableEntry('达成评价途径');
 te.ColSpan = 4;
 append(r,te);
-te = TableEntry('平均成绩');
+te = TableEntry('评测结果');
 te.ColSpan = 2;
 append(r,te);
 te = TableEntry('达成度');
