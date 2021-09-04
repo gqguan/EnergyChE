@@ -278,7 +278,8 @@ if nargin == 2
         append(doc,t);
         
         % 实验课程教纲中表列实验内容和学时明细
-        if ~isempty(regexp(cc.Title,'实验','once'))
+        if ~isempty(regexp(cc.Title,'实验','once')) && ...
+                ~isequal(cc.Category,'集中实践教学')
             append(doc,clone(landscapePLO));
             p3 = Paragraph(sprintf('《%s》实验教学内容与学时分配',cc.Title));
             p3.Style = headStyle;
