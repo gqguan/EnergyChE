@@ -43,7 +43,7 @@ while ~isempty(raw1)
         range = find(idxName1s,2);
         range(2) = range(2)-1;
     else
-        range = [idxName1s,size(raw1,2)];
+        range = [1,size(raw1,2)];
     end
     raw2 = raw1(:,range(1):range(2));
     raw1(:,range(1):range(2)) = [];
