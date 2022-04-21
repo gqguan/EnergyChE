@@ -27,7 +27,9 @@ raw = readcell(filePath);
 prompt = sprintf('导入文件%s',filePath);
 % 学生成绩明细
 raw0 = raw(5:end,5:end);
-raw0(cellfun(@(x)~isnumeric(x),raw0)) = {nan};
+% 成绩数据中文本转数字
+idx = cellfun(@(x)~isnumeric(x),raw0);
+raw0(idx) = num2cell(str2double(raw0(idx)));
 sMat = cellfun(@(x)double(x),raw0);
 % 学生信息
 Class = categorical(raw(5:end,1)); % 班级
