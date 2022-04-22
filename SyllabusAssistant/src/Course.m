@@ -7,13 +7,13 @@ classdef Course
         Title = ""
         Category = ""
         CompulsoryOrNot = true
-        ClassHour = []
+        ClassHour = ""
         Credits = ""
         Semester = ""
         Institute = "化学与化工学院"
         ProgramOriented = "能源化学工程"
         Language = "中文"
-        Prerequisites = {}
+        Prerequisites = {''}
         Outcomes = {}
         Objectives = {}
         Description = ""
