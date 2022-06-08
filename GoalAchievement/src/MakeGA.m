@@ -152,7 +152,10 @@ firstLetterCat = categories(firstLetterAll);
 subPoint = zeros(length(firstLetterCat),1);
 w2 = zeros(1,length(firstLetterAll));
 weight = cell2mat(saveData.Data.weight.Data(:,2:end));
-avgSubscore = mean(tr.Detail{:,4:end},'omitnan');
+scores = saveData.Data.tr.Detail{:,4:end};
+scores(any(isnan(scores),2),:) = []; % 删除成绩单中有NaN的记录
+avgSubscore = mean(scores);
+% avgSubscore = mean(tr.Detail{:,4:end},'omitnan');
 x = avgSubscore./tr.SubPoints;
 row129 = 1; % 毕业要求指标点、课程目标及达成度（第1、2和9列）定位行
 for iObj = 1:size(o2w,2)
@@ -228,20 +231,63 @@ title = Paragraph(sprintf('《%s》课程成绩单',cc.Title));
 title.Style = headStyle;
 append(doc,title);
 tabStudents = tr.Detail(:,1:3);
-tabDetails = tr.Detail(:,4:end);
+tabDetails = TabNum2Str(tr.Detail(:,4:end));
 tabSelected = tabDetails(:,any(o2w,2)); % 只列出支撑课程目标的打分点
-rowSet = 10;
-while width(tabSelected) > rowSet
-    t = Table([tabStudents,tabSelected(:,1:rowSet)]);
+colSet = 10;
+while width(tabSelected) > colSet
+    t = Table([tabStudents,tabSelected(:,1:colSet)]);
+    % 设定表中各列宽度
+    Grps = TableColSpecGroup;
+    Grps.Span = 13;
+    % 第1列宽度
+    TabSpecs(1) = TableColSpec;
+    TabSpecs(1).Span = 1;
+    TabSpecs(1).Style = {Width("21%")};
+    % 第2列宽度
+    TabSpecs(2) = TableColSpec;
+    TabSpecs(2).Span = 1;
+    TabSpecs(2).Style = {Width("10%")};
+    % 第3列宽度
+    TabSpecs(3) = TableColSpec;
+    TabSpecs(3).Span = 1;
+    TabSpecs(3).Style = {Width("10%")};
+    % 第4-13列（合计10列）
+    TabSpecs(4) = TableColSpec;
+    TabSpecs(4).Span = 9;
+    TabSpecs(4).Style = {Width("6.5%")}; 
+    Grps.ColSpecs = TabSpecs;
+    t.ColSpecGroups = Grps;
     t.Style = [t.Style,tableStyle];
     t.Style = [t.Style,bodyStyle];
     append(doc,t);
     p = Paragraph('下表继续');
     p.Style = bodyStyle;
     append(doc,p);
-    tabSelected(:,1:rowSet) = [];
+    tabSelected(:,1:colSet) = [];
 end
 t = Table([tabStudents,tabSelected]);
+% 设定表中各列宽度
+Grps = TableColSpecGroup;
+Grps.Span = width([tabStudents,tabSelected]);
+% 第1列宽度
+TabSpecs(1) = TableColSpec;
+TabSpecs(1).Span = 1;
+TabSpecs(1).Style = {Width("21%")};
+% 第2列宽度
+TabSpecs(2) = TableColSpec;
+TabSpecs(2).Span = 1;
+TabSpecs(2).Style = {Width("10%")};
+% 第3列宽度
+TabSpecs(3) = TableColSpec;
+TabSpecs(3).Span = 1;
+TabSpecs(3).Style = {Width("10%")};
+% 其余列
+TabSpecs(4) = TableColSpec;
+TabSpecs(4).Span = Grps.Span-3;
+strWidth = sprintf('"%.1f%%"',floor(59/(Grps.Span-3)*10)/10);
+TabSpecs(4).Style = {Width(strWidth)}; 
+Grps.ColSpecs = TabSpecs;
+t.ColSpecGroups = Grps;
 t.Style = [t.Style,tableStyle];
 t.Style = [t.Style,bodyStyle];
 append(doc,t);
