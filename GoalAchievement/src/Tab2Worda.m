@@ -50,8 +50,9 @@ bodyFont.FamilyName='Times New Roman';
 bodyFont.EastAsiaFamilyName='宋体';
 % 定义表属性
 tableStyle = {Width('100%'), Border('solid'), ColSep('solid'), RowSep('solid')};
-mainHeaderRowStyle = {HAlign('center'), VAlign('middle'), InnerMargin('2pt', '2pt', '2pt', '2pt'), ...
-    BackgroundColor('lightgrey'), headFont};
+mainHeaderRowStyle = {HAlign('center'), VAlign('middle'), ...
+    OuterMargin('0pt', '0pt', '0pt', '0pt'), InnerMargin('2pt', '2pt', '2pt', '2pt'), ...
+    BackgroundColor('lightgrey'), LineSpacing('0pt'), headFont};
 bodyStyle = {OuterMargin('0pt', '0pt', '0pt', '0pt'), InnerMargin('2pt', '2pt', '2pt', '2pt'), bodyFont};
 
 %%
@@ -247,6 +248,19 @@ function Grps = GetTabWidth(type, NCol)
             TabSpecs(3) = TableColSpec;
             TabSpecs(3).Span = 1;
             TabSpecs(3).Style = {Width("30%")}; 
+        case('课程目标与毕业要求关系表')
+            % 第1列宽度
+            TabSpecs(1) = TableColSpec;
+            TabSpecs(1).Span = 1;
+            TabSpecs(1).Style = {Width("30%")};
+            % 第2列宽度
+            TabSpecs(2) = TableColSpec;
+            TabSpecs(2).Span = 1;
+            TabSpecs(2).Style = {Width("35%")};
+            % 第3列宽度
+            TabSpecs(3) = TableColSpec;
+            TabSpecs(3).Span = 1;
+            TabSpecs(3).Style = {Width("35%")};
         otherwise
             % 第1列宽度
             TabSpecs(1) = TableColSpec;

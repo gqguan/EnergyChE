@@ -34,36 +34,35 @@ doc = Document([filePath,file1],'docx');
 if exist('figPath','var') == 0
     figPath = filePath;
 end
-% default page layout is portrait
+% default page layout is A4 portrait
 portraitPLO = DOCXPageLayout;
-portraitPageSize = portraitPLO.PageSize;
+portraitPLO.PageSize.Height = '297mm';
+portraitPLO.PageSize.Width = '210mm';
+append(doc,portraitPLO);
 % 封面页
 logo = Image([figPath,'logo.png']);
 logo.Style = {HAlign('center'),ScaleToFit(1)};
 append(doc,logo);
 append(doc,LineBreak);
 % 标题
-h1Style = {HAlign('center'),FontSize('32pt'),headFont};
+h1Style = {HAlign('center'),FontSize('32pt'),LineSpacing(1),headFont};
 p1 = Paragraph('课程目标达成情况评价报告');
 p1.Style = [p1.Style,h1Style];
 append(doc,p1);
 append(doc,LineBreak);
 append(doc,LineBreak);
-% 课程信息表
+% 封面信息
 t1 = Table(2);
 t1Style = {Width('12cm'), Border('none'), ColSep('none'), RowSep('none'), ...
     FontSize('24pt'), HAlign('center')};
 t1.Style = [t1.Style,t1Style];
-% 设定表中各列宽度
 Grps = TableColSpecGroup;
 Grps.Span = 2;
-% 第1列宽度
 TabSpecs(1) = TableColSpec;
 TabSpecs(1).Span = 1;
 TabSpecs(1).Style = {Width("4cm")};
 Grps.ColSpecs = TabSpecs;
 t1.ColSpecGroups = [t1.ColSpecGroups,Grps];
-% 课程信息表第1行
 t1Heads = {'课程名称','负责教师','任课教师','开课学期','学生专业','学生班级'};
 t1Contents = {cc.Title,tr.Teacher,tr.Teacher,'','能源化学工程',tr.Class};
 for i = 1:length(t1Heads)
@@ -85,12 +84,84 @@ append(doc,LineBreak);
 p = Paragraph(datestr(saveData.Datetime,'YYYY年mm月DD日'));
 p.Style = [p.Style,{HAlign('center'),FontSize('24pt'),bodyFont}];
 append(doc,p);
+append(doc,PageBreak());
+% 生成报告正文第1部分
+h1 = Heading1('一、课程基本信息');
+h1.Style = [h1.Style,{HAlign('left'),FontSize('14pt'),headFont}];
+h1Style = h1.Style;
+append(doc,h1);
+% 课程基本信息表
+t2 = Table(4);
+t2Style = {Width('14cm'),RowHeight('16pt'),Border('single'),FontSize('12pt'),...
+    HAlign('center')};
+t2.Style = [t2.Style,t2Style];
+Grps = TableColSpecGroup;
+Grps.Span = 4;
+TabSpecs(1) = TableColSpec;
+TabSpecs(1).Span = 1;
+TabSpecs(1).Style = {Width("15%")};
+TabSpecs(2) = TableColSpec;
+TabSpecs(2).Span = 1;
+TabSpecs(2).Style = {Width("35%")};
+TabSpecs(3) = TableColSpec;
+TabSpecs(3).Span = 1;
+TabSpecs(3).Style = {Width("15%")};
+TabSpecs(4) = TableColSpec;
+TabSpecs(4).Span = 1;
+TabSpecs(4).Style = {Width("35%")};
+Grps.ColSpecs = TabSpecs;
+t2.ColSpecGroups = [t2.ColSpecGroups,Grps];
+t2Heads = {'课程名称','课程代码';'课程类型','课程学分';'负责教师','任课教师';...
+    '学生学院','学生专业';'学生班级','学生人数';'上课时间','上课地点'};
+t2Contents = {cc.Title,cc.Code;cc.Category,cc.Credits;tr.Teacher,tr.Teacher;...
+    cc.Institute,cc.ProgramOriented;tr.Class,string(height(tr.Detail));'',''};
+for i = 1:6 % 行数
+    r2 = TableRow;
+    for j = 1:2 % 两栏
+        te = TableEntry(t2Heads{i,j});
+        headerStyle = {HAlign('left'), VAlign('middle'), ...
+            InnerMargin('2pt', '2pt', '2pt', '2pt'), ...
+            OuterMargin('0pt', '0pt', '0pt', '0pt'), headFont};
+        te.Style = [te.Style,headerStyle];
+        append(r2,te);
+        te = TableEntry(t2Contents{i,j});
+        te.Style = {HAlign('center'),bodyFont};
+        append(r2,te);
+    end
+    append(t2,r2);
+end
+append(doc,t2);
+% 生成报告正文第2部分
+h1 = Heading1('二、课程目标与毕业要求及其指标点的对应关系');
+h1.Style = h1Style;
+append(doc,h1);
+p = Paragraph(TextMaker(cc,tr,[],2));
+p.Style = [p.Style,{HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont}];
+append(doc,p);
+% 生成“课程目标与毕业要求关系表”
+idx = fix(str2double(cellfun(@(x)regexp(x,'\d*\.?\d*','match'),cc.Outcomes))); % 毕业要求内容索引
+load([figPath,'database.mat'],'db_GradRequires')
+t3Contents = [cellfun(@(i)sprintf('毕业要求%d（%s）：%s',i,db_GradRequires{i,:}),...
+    num2cell(idx),'UniformOutput',false),... % 从db_GradRequires中获取本课程支撑的毕业要求并合并为cell字符串数组
+    cc.Outcomes,cc.Objectives];
+% 置空重复单元
+blankIdx = true(size(idx));
+[~,ia] = unique(idx); % 找到不重复的元素
+blankIdx(ia) = false; blankIdx = find(blankIdx);
+for i = 1:length(blankIdx) % 若无重复元素则for循环不会执行
+    t3Contents{blankIdx(i),1} = '';
+end
+t3Heads = {'毕业要求','指标点','课程目标'};
+t3 = Tab2Worda(t3Contents,'课程目标与毕业要求关系表','',t3Heads);
+t3.Style = [t3.Style,{FontSize('12pt')}];
+append(doc,t3)
+append(doc,LineBreak);
 
 % define landscape layout
 landscapePLO = DOCXPageLayout;
 landscapePLO.PageSize.Orientation = "landscape";
-landscapePLO.PageSize.Height = portraitPageSize.Width;
-landscapePLO.PageSize.Width = portraitPageSize.Height;
+landscapePLO.PageSize.Height = portraitPLO.PageSize.Width;
+landscapePLO.PageSize.Width = portraitPLO.PageSize.Height;
 % 横向纸面布局
 append(doc,clone(landscapePLO));
 % 标题

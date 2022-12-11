@@ -82,5 +82,19 @@ switch opt
         texts = sprintf('%s通过课间访谈和试后分析，后续课程教学应继续强化教研、教改。',texts);
     case(1)
         texts = '本课程以培养学生能力为目标，按照课程教学大纲的要求，围绕课程目标进行教学设计并实施教学。';
+    case(2)
+        % 根据指标点获得毕业要求
+        idx = fix(str2double(cellfun(@(x)regexp(x,'\d*\.?\d*','match'),cc.Outcomes)));
+        catIdx = categories(categorical(idx));
+        listStr = sprintf('%s',catIdx{1});
+        if length(catIdx) >= 2
+            for i = 2:length(catIdx)
+                listStr = sprintf('%s、%s',listStr,catIdx{i});
+            end
+        end
+        texts = sprintf('本课程共有%d个课程目标',size(cc.Outcomes,1));
+        texts = sprintf('%s，分别支撑毕业要求%s中的相关指标点',texts,listStr);
+        texts = sprintf('%s。课程目标与毕业要求及其指标点的对应关系如下表所示。',texts);
+        
 end
 
