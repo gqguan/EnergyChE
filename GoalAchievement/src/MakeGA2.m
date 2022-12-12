@@ -56,6 +56,8 @@ t1 = Table(2);
 t1Style = {Width('12cm'), Border('none'), ColSep('none'), RowSep('none'), ...
     FontSize('24pt'), HAlign('center')};
 t1.Style = [t1.Style,t1Style];
+bottomBorderStyle = Border();
+bottomBorderStyle.BottomStyle = "single";
 Grps = TableColSpecGroup;
 Grps.Span = 2;
 TabSpecs(1) = TableColSpec;
@@ -73,13 +75,15 @@ for i = 1:length(t1Heads)
     te.Style = [te.Style,headerStyle];
     append(r1,te);
     te = TableEntry(t1Contents{i});
-    te.Style = {HAlign('center'),FontSize('24pt'),bodyFont};
+    te.Style = {HAlign('center'),InnerMargin('2pt', '2pt', '2pt', '2pt'),...
+        OuterMargin('0pt', '0pt', '0pt', '0pt'),FontSize('24pt'),bottomBorderStyle,bodyFont};
     append(r1,te);
     append(t1,r1);
 end
 append(doc,t1);
-append(doc,LineBreak);
-append(doc,LineBreak);
+for iLn = 1:5
+    append(doc,LineBreak);
+end
 % 日期
 p = Paragraph(datestr(saveData.Datetime,'YYYY年mm月DD日'));
 p.Style = [p.Style,{HAlign('center'),FontSize('24pt'),bodyFont}];
@@ -92,8 +96,8 @@ h1Style = h1.Style;
 append(doc,h1);
 % 课程基本信息表
 t2 = Table(4);
-t2Style = {Width('14cm'),RowHeight('16pt'),Border('single'),FontSize('12pt'),...
-    HAlign('center')};
+t2Style = {Width('14cm'),RowHeight('16pt'),FontSize('12pt'),...
+    HAlign('center'),Border('solid'),ColSep('solid'),RowSep('solid')};
 t2.Style = [t2.Style,t2Style];
 Grps = TableColSpecGroup;
 Grps.Span = 4;
@@ -160,9 +164,23 @@ append(doc,LineBreak);
 h1 = Heading1('三、评价标准');
 h1.Style = h1Style;
 append(doc,h1);
-p = Paragraph(saveData.Data.criteria);
-p.Style = [p.Style,{HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont}];
-append(doc,p);
+for i = 1:length(saveData.Data.criteria)
+    p = Paragraph(saveData.Data.criteria{i});
+    p.Style = [p.Style,{HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont}];
+    append(doc,p);
+end
+append(doc,LineBreak);
+% 生成报告正文第4部分
+h1 = Heading1('四、课程目标的评价依据集评价方法');
+h1.Style = h1Style;
+append(doc,h1);
+for i = 1:length(saveData.Data.basis)
+    p = Paragraph(saveData.Data.basis{i});
+    p.Style = [p.Style,{HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont}];
+    append(doc,p);
+end
+append(doc,LineBreak);
+
 % define landscape layout
 landscapePLO = DOCXPageLayout;
 landscapePLO.PageSize.Orientation = "landscape";
