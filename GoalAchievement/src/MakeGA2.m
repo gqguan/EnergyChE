@@ -156,7 +156,13 @@ t3 = Tab2Worda(t3Contents,'课程目标与毕业要求关系表','',t3Heads);
 t3.Style = [t3.Style,{FontSize('12pt')}];
 append(doc,t3)
 append(doc,LineBreak);
-
+% 生成报告正文第3部分
+h1 = Heading1('三、评价标准');
+h1.Style = h1Style;
+append(doc,h1);
+p = Paragraph(saveData.Data.criteria);
+p.Style = [p.Style,{HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont}];
+append(doc,p);
 % define landscape layout
 landscapePLO = DOCXPageLayout;
 landscapePLO.PageSize.Orientation = "landscape";
