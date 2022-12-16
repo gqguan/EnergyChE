@@ -4,14 +4,16 @@
 
 %% 初始化
 clear
-cCourseList = 'db_Curriculum2021a';
-sCourseList = 'db_Curriculum2021b';
+yr = input('输入培养方案年份：','s');
+cCourseList = sprintf('db_Curriculum%sa',yr);
+sCourseList = sprintf('db_Curriculum%sb',yr);
+sIndicator = sprintf('db_Indicators%s',yr);
 % 载入必修和选修课程
 load('database.mat',cCourseList)
 load('database.mat',sCourseList)
 % 载入指标点
-load('database.mat','db_Indicators2021')
-db_Indicators = db_Indicators2021;
+load('database.mat',sIndicator)
+db_Indicators = eval(sIndicator);
 
 %% 按必修课表列出相应支撑的指标点编号
 supportIndicator = string;
