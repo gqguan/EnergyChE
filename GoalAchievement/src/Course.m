@@ -3,6 +3,7 @@ classdef Course
     %   此处显示详细说明
     
     properties
+        ReleaseYear = ""
         Code = ""
         Title = ""
         Category = ""
