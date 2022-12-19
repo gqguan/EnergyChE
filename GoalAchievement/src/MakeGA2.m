@@ -21,7 +21,6 @@ bodyFont.FamilyName = 'Times New Roman';
 bodyFont.EastAsiaFamilyName = '宋体';
 % 定义段落属性
 headStyle = {HAlign('center'),FontSize('18pt'),headFont};
-pStyle = {HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont};
 % 定义表属性
 tableStyle = {Width('100%'), Border('solid'), ColSep('solid'), RowSep('solid')};
 bodyStyle = {VAlign('middle'), OuterMargin('0pt', '0pt', '0pt', '0pt'), ...
@@ -46,10 +45,14 @@ logo.Style = {HAlign('center'),ScaleToFit(1)};
 append(doc,logo);
 append(doc,LineBreak);
 % 标题
-h1Style = {HAlign('center'),FontSize('32pt'),LineSpacing(1),headFont};
-p1 = Paragraph('课程目标达成情况评价报告');
-p1.Style = [p1.Style,h1Style];
+p1 = Paragraph('化学与化工学院');
+t1Style = [p1.Style,{HAlign('center'),FontSize('32pt'),LineSpacing(1),headFont}];
+p1.Style = t1Style;
 append(doc,p1);
+append(doc,LineBreak);
+p1 = Paragraph('课程目标达成情况评价报告');
+p1.Style = t1Style;
+append(doc,p1)
 append(doc,LineBreak);
 append(doc,LineBreak);
 % 封面信息
@@ -82,7 +85,7 @@ for i = 1:length(t1Heads)
     append(t1,r1);
 end
 append(doc,t1);
-for iLn = 1:5
+for iLn = 1:3
     append(doc,LineBreak);
 end
 % 日期
@@ -141,7 +144,9 @@ h1 = Heading1('二、课程目标与毕业要求及其指标点的对应关系');
 h1.Style = h1Style;
 append(doc,h1);
 p = Paragraph(TextMaker(cc,tr,[],2));
-p.Style = [p.Style,pStyle];
+pStyle = [p.Style,...
+    {HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont}];
+p.Style = pStyle;
 append(doc,p);
 % 生成“课程目标与毕业要求关系表”
 idx = fix(str2double(cellfun(@(x)regexp(x,'\d*\.?\d*','match'),cc.Outcomes))); % 毕业要求内容索引
@@ -167,17 +172,17 @@ h1.Style = h1Style;
 append(doc,h1);
 for i = 1:length(saveData.Data.criteria)
     p = Paragraph(saveData.Data.criteria{i});
-    p.Style = [p.Style,pStyle];
+    p.Style = pStyle;
     append(doc,p);
 end
 append(doc,LineBreak);
 % 生成报告正文第4部分
-h1 = Heading1('四、课程目标的评价依据集评价方法');
+h1 = Heading1('四、课程目标的评价依据及评价方法');
 h1.Style = h1Style;
 append(doc,h1);
 for i = 1:length(saveData.Data.basis)
     p = Paragraph(saveData.Data.basis{i});
-    p.Style = [p.Style,pStyle];
+    p.Style = pStyle;
     append(doc,p);
 end
 append(doc,LineBreak);
@@ -185,7 +190,75 @@ append(doc,LineBreak);
 h1 = Heading1('五、评价结果及分析');
 h1.Style = h1Style;
 append(doc,h1);
-TextBoxData2Paragraph(doc,text,pStyle);
+h2 = Heading2('5.1 当前课程教学目标达成情况');
+h2Style = [h2.Style,{HAlign('left'),FontSize('12pt'),headFont}];
+h2.Style = h2Style;
+append(doc,h2);
+p = Paragraph('课程目标达成评价结果采用如下箱式图表示：');
+p.Style = pStyle;
+append(doc,p);
+img1 = Image([figPath,'GADetail.png']);
+img1.Style = {ScaleToFit};
+append(doc,img1);
+append(doc,LineBreak);
+p = Paragraph(TextMaker(cc,tr,cell2mat(saveData.Data.listObj.Data(:,3))));
+p.Style = pStyle;
+append(doc,p);
+append(doc,LineBreak);
+h2 = Heading2('5.2 课程教学持续改进情况');
+h2.Style = h2Style;
+append(doc,h2);
+p = Paragraph(TextMaker(cc,tr,saveData.Data.GAResult,3));
+p.Style = pStyle;
+append(doc,p);
+TextBoxData2Paragraph(doc,saveData.Data.text,pStyle);
+img2 = Image([figPath,'GAResult.png']);
+img2.Style = {ScaleToFit};
+append(doc,img2);
+append(doc,PageBreak);
+% 生成封底
+h1 = Heading1('六、审核意见');
+h1.Style = h1Style;
+append(doc,h1);
+tb = Table(2);
+tbStyle = {Width('100%'),RowHeight('9cm'),FontSize('12pt'),...
+    HAlign('center'),Border('solid'),ColSep('solid'),RowSep('solid')};
+tb.Style = [tb.Style,tbStyle];
+Grps = TableColSpecGroup;
+Grps.Span = 2;
+TabSpecs(1) = TableColSpec;
+TabSpecs(1).Span = 1;
+TabSpecs(1).Style = {Width("5%")};
+TabSpecs(2) = TableColSpec;
+TabSpecs(2).Span = 1;
+TabSpecs(2).Style = {Width("95%")};
+Grps.ColSpecs = TabSpecs;
+tb.ColSpecGroups = [tb.ColSpecGroups,Grps];
+tbHeight = {'6cm','6cm','8.5cm'};
+tbLineIdent = {'8cm','8cm','4cm'};
+tbContent = {'课程组审核意见','课程负责人签字：';...
+             '系审核意见','系主任签字：';...
+             '学院教学指导委员会审核意见','学院教学指导委员会主任签字：'};
+for i = 1:3
+    r = TableRow;
+    r.Style = [r.Style,{Height(tbHeight{i})}];
+    te = TableEntry(tbContent{i,1});
+    te.Style = [headerStyle,{HAlign('center')}];
+    append(r,te);
+    te = TableEntry(Paragraph(' '));
+    for j = 1:5
+        append(te,Paragraph(' '));
+    end
+    p = Paragraph(tbContent{i,2});
+    p.Style = [pStyle,{FirstLineIndent(tbLineIdent{i})}];
+    append(te,p);
+    p = Paragraph('   年      月      日');
+    p.Style = [pStyle,{FirstLineIndent('12cm')}];
+    append(te,p);
+    append(r,te);
+    append(tb,r);
+end
+append(doc,tb);
 
 % define landscape layout
 landscapePLO = DOCXPageLayout;
@@ -195,7 +268,10 @@ landscapePLO.PageSize.Width = portraitPLO.PageSize.Height;
 % 横向纸面布局
 append(doc,clone(landscapePLO));
 % 标题
-p = Paragraph(sprintf('《%s》课程目标达成度分析报告',cc.Title));
+h1 = Heading1('附件：');
+h1.Style = h1Style;
+append(doc,h1)
+p = Paragraph(sprintf('附表1：《%s》课程目标达成度分析明细表',cc.Title));
 p.Style = headStyle;
 append(doc,p);
 % 表宽设置
@@ -360,24 +436,24 @@ te.ColSpan = 8;
 append(r,te);
 append(t,r);
 append(doc,t);
-
-% 绘图
-figFile = [figPath,'GAResult.png'];
-if exist(figFile,'file') == 2
-    text = sprintf('%s级《%s》课程目标达成度如下图所示：',tr.Class,tr.Name);
-    p = Paragraph(text);
-    p.Style = bodyStyle;
-    append(doc,p);
-    fig = Image(figFile);
-    append(doc,fig);
-    prompt = sprintf('导入图片%s',figFile);
-else
-    prompt = sprintf('找不到图片%s',figFile);
-end
+% 
+% % 绘图
+% figFile = [figPath,'GAResult.png'];
+% if exist(figFile,'file') == 2
+%     text = sprintf('%s级《%s》课程目标达成度如下图所示：',tr.Class,tr.Name);
+%     p = Paragraph(text);
+%     p.Style = bodyStyle;
+%     append(doc,p);
+%     fig = Image(figFile);
+%     append(doc,fig);
+%     prompt = sprintf('导入图片%s',figFile);
+% else
+%     prompt = sprintf('找不到图片%s',figFile);
+% end
 
 % 学生成绩明细
 append(doc,clone(landscapePLO));
-title = Paragraph(sprintf('《%s》课程成绩单',cc.Title));
+title = Paragraph(sprintf('附表2：《%s》课程成绩单',cc.Title));
 title.Style = headStyle;
 append(doc,title);
 tabStudents = tr.Detail(:,1:3);
@@ -444,7 +520,7 @@ append(doc,t);
 
 close(doc);
 
-prompt = sprintf('%s；生成文件%s',prompt,file1);
+prompt = sprintf('生成文件%s',file1);
 
 end
 
