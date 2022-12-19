@@ -21,6 +21,7 @@ bodyFont.FamilyName = 'Times New Roman';
 bodyFont.EastAsiaFamilyName = '宋体';
 % 定义段落属性
 headStyle = {HAlign('center'),FontSize('18pt'),headFont};
+pStyle = {HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont};
 % 定义表属性
 tableStyle = {Width('100%'), Border('solid'), ColSep('solid'), RowSep('solid')};
 bodyStyle = {VAlign('middle'), OuterMargin('0pt', '0pt', '0pt', '0pt'), ...
@@ -86,7 +87,7 @@ for iLn = 1:5
 end
 % 日期
 p = Paragraph(datestr(saveData.Datetime,'YYYY年mm月DD日'));
-p.Style = [p.Style,{HAlign('center'),FontSize('24pt'),bodyFont}];
+p.Style = [p.Style,{HAlign('center'),FontSize('18pt'),bodyFont}];
 append(doc,p);
 append(doc,PageBreak());
 % 生成报告正文第1部分
@@ -140,7 +141,7 @@ h1 = Heading1('二、课程目标与毕业要求及其指标点的对应关系');
 h1.Style = h1Style;
 append(doc,h1);
 p = Paragraph(TextMaker(cc,tr,[],2));
-p.Style = [p.Style,{HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont}];
+p.Style = [p.Style,pStyle];
 append(doc,p);
 % 生成“课程目标与毕业要求关系表”
 idx = fix(str2double(cellfun(@(x)regexp(x,'\d*\.?\d*','match'),cc.Outcomes))); % 毕业要求内容索引
@@ -166,7 +167,7 @@ h1.Style = h1Style;
 append(doc,h1);
 for i = 1:length(saveData.Data.criteria)
     p = Paragraph(saveData.Data.criteria{i});
-    p.Style = [p.Style,{HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont}];
+    p.Style = [p.Style,pStyle];
     append(doc,p);
 end
 append(doc,LineBreak);
@@ -176,10 +177,15 @@ h1.Style = h1Style;
 append(doc,h1);
 for i = 1:length(saveData.Data.basis)
     p = Paragraph(saveData.Data.basis{i});
-    p.Style = [p.Style,{HAlign('justify'),FontSize('12pt'),FirstLineIndent('24pt'),bodyFont}];
+    p.Style = [p.Style,pStyle];
     append(doc,p);
 end
 append(doc,LineBreak);
+% 生成报告正文第5部分
+h1 = Heading1('五、评价结果及分析');
+h1.Style = h1Style;
+append(doc,h1);
+TextBoxData2Paragraph(doc,text,pStyle);
 
 % define landscape layout
 landscapePLO = DOCXPageLayout;
