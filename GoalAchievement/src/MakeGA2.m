@@ -180,6 +180,23 @@ append(doc,LineBreak);
 h1 = Heading1('四、课程目标的评价依据及评价方法');
 h1.Style = h1Style;
 append(doc,h1);
+texts = '本课程以培养学生能力为目标，按照课程教学大纲的要求，围绕课程目标进行教学设计并实施教学';
+wayStr = strjoin(saveData.Data.weight.Data(:,1),'、');
+texts = sprintf('%s。%s年度课程教学采用%s%d种方式评估课程教学质量',...
+    texts,tr.Class,wayStr,size(saveData.Data.weight.Data,1));
+texts = sprintf('%s，其权重如下表所列：',texts);
+p = Paragraph(texts);
+p.Style = pStyle;
+append(doc,p);
+t4 = Tab2Worda(saveData.Data.weight.Data,'各课程评价方式的权重一览表','',...
+    saveData.Data.weight.ColumnName');
+t4.Style = [t4.Style,{FontSize('12pt')}];
+append(doc,t4);
+texts = '在每种课程评价方式中又分别设立了若干评分点，各评分点与课程目标的对应关系及达成度计算方法可参照《化学与化工学院本科专业课程目标达成情况评价办法》';
+texts = sprintf('%s，具体过程详见如附表1所列。',texts);
+p = Paragraph(texts);
+p.Style = pStyle;
+append(doc,p);
 for i = 1:length(saveData.Data.basis)
     p = Paragraph(saveData.Data.basis{i});
     p.Style = pStyle;

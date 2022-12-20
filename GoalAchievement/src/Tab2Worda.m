@@ -261,6 +261,15 @@ function Grps = GetTabWidth(type, NCol)
             TabSpecs(3) = TableColSpec;
             TabSpecs(3).Span = 1;
             TabSpecs(3).Style = {Width("35%")};
+        case('各课程评价方式的权重一览表')
+            % 第1列宽度
+            TabSpecs(1) = TableColSpec;
+            TabSpecs(1).Span = 1;
+            TabSpecs(1).Style = {Width("25%")};
+            % 第2列宽度
+            TabSpecs(2) = TableColSpec;
+            TabSpecs(2).Span = 1;
+            TabSpecs(2).Style = {Width([num2str(80/(NCol-1)),'%'])};
         otherwise
             % 第1列宽度
             TabSpecs(1) = TableColSpec;
