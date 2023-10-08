@@ -16,7 +16,24 @@ clear;
 %% 主程序
 % 从微盘的“课程一览表.xlsx”中获取课程支撑矩阵，并与database.mat中的db_Curriculum.ReqMatrix比较
 % 若两者不同可以选择更新指标点的课程支撑矩阵
-db_Curriculum = EA_GetReqMatrix(); 
+if exist('db_Curriculum','var')
+    fprintf('当前工作空间中存在变量db_Curriculum。\n');
+    prompt = '使用当前变量选【0】\n调用EA_GetReqMatrix()载入课程列表数据选【1】\n';
+else
+    prompt = '调用EA_GetReqMatrix()载入课程列表数据选【1】\n';
+end
+useExist = input([prompt,'请选择：']);
+switch useExist
+    case(0)
+        disp('使用当前工作空间中的课程列表数据')
+    case(1)
+        disp('调用EA_GetReqMatrix()载入课程列表数据')
+        db_Curriculum = EA_GetReqMatrix();
+    otherwise
+        disp('无效输入！')
+        return
+end
+
 % 导入手工输入的课程达成度结果
 QE_Courses = EA_ImportQECourses();
 % 计算毕业要求达成度
