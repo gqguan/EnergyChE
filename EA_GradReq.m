@@ -63,7 +63,11 @@ for iReq = 1:length(ReqLists)
         if sum(idxs) == 1
             idx_Courses = db_Curriculum.ReqMatrix(:,idxs);
             Courses = db_Curriculum.Name(logical(idx_Courses)); % 列出该指标点的全部支撑课程名称（胞列向量）
-            IDs = db_Curriculum.ID(logical(idx_Courses)); % 列出该指标点的全部支撑课程代码（胞列向量）
+            if str2double(Class)<2018
+                IDs = db_Curriculum.ID(logical(idx_Courses)); % 列出该指标点的全部支撑课程代码（胞列向量）
+            else
+                IDs = db_Curriculum.IDv2018(logical(idx_Courses));
+            end
             Credits = db_Curriculum.Credit(logical(idx_Courses)); % 列出该指标点的全部支撑课程学分（数值列向量）
             CourseWeights = Credits/sum(Credits); % 计算该指标点的全部支撑课程权重（数值列向量）
             QECourses = zeros(size(Courses)); % 初始化各支撑课程的教学目标达成结果
