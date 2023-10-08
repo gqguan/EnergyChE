@@ -3,7 +3,8 @@ function oTab = SupportCourses(db_Curriculum1,db_Curriculum2,db_Indicators)
 
 % 导入毕业要求及指标说明
 if ~exist('db_Indicators','var')
-    load('database.mat','db_Indicators');
+    load('database.mat','db_Indicators2021');
+    db_Indicators = db_Indicators2021;
 end
 
 if ~exist('db_Curriculum2','var')
