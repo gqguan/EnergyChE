@@ -2,10 +2,13 @@
 %
 % by Dr. Guan Guoqiang @ SCUT on 2023/11/22
 
-function courseList = ListCourses(currentYear)
+function courseList = ListCourses(currentYear,filePath)
     % 输入参数检查；将输入变量currentYear转为数值
     if ~exist('currentYear','var')
         currentYear = "2023"; % 缺省值为2022-2023学年
+    end
+    if ~exist('filePath','var')
+        filePath = 'D:\Repo';
     end
     switch class(currentYear)
         case({'string','char'})
@@ -45,7 +48,6 @@ function courseList = ListCourses(currentYear)
         end
         idx1 = strcmp(curriculum.Semester,string((5-i)*2-1))|...
             strcmp(curriculum.Semester,string((5-i)*2)); % 例如胞向量classList第1个分量为4年级，对应为第7、8学期
-%         curriculum.Remark = arrayfun(@(x)strcat(classList{i},"级 ",x),curriculum.Remark);
         reqMatrix = curriculum.ReqMatrix; reqMatrix = reqMatrix(idx1,:);
         idxMat = mat2cell(reqMatrix,ones(size(reqMatrix,1),1));
         Indicator = cellfun(@(x)table2cell(indicators(logical(x),1:2)),idxMat,'UniformOutput',false);
@@ -57,10 +59,11 @@ function courseList = ListCourses(currentYear)
     % 在courseList中添加“课程负责人”列
     courseList.Teacher = arrayfun(@(x)string,(1:height(courseList))');
     % 输出excel文件供教务通知给相应课程负责人
-    filename1 = sprintf('%s能化专业报备课程列表.xlsx',classYear);
+    filename1 = fullfile(filePath,sprintf('%s能化专业报备课程列表.xlsx',classYear));
     courseList = courseList(:,[9 8 3 1 2 4 5 7 6]); % 调整输出表格各列顺序
     writetable(courseList,filename1)
     % 生成CollectMaterial.mlapp所需的FileListXXXX.xlsx
     FileList = cellstr(courseList.Class+"《"+courseList.Name+"》");
-    filename2 = sprintf('FileList%d.xlsx',currentYear);
+    FileList(:,2:6) = {"-"};
+    filename2 = fullfile(filePath,sprintf('FileList%d.xlsx',currentYear));
     writecell(FileList,filename2)
