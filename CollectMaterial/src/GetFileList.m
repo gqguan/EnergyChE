@@ -63,6 +63,8 @@ switch opt
                         regexp(x,'£¨\d*£©','match'),'£¨','£©'),{lc.name});
                     if ~isempty(entryHash4L) && contains(classYear{i},entryClass)
                         newFileList(i,j+1) = join(entryHash4L,', ');
+                    else
+                        newFileList{i,j+1} = '-';
                     end
                 end
             end
