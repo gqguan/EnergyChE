@@ -61,7 +61,10 @@ switch opt
                     entryHash4L = cellfun(@(x)extractBetween(x,'_','.'),{lc.name});
                     entryClass = cellfun(@(x)extractBetween(...
                         regexp(x,'£¨\d*£©','match'),'£¨','£©'),{lc.name});
-                    if ~isempty(entryHash4L) && contains(classYear{i},entryClass)
+                    filter = strcmp(entryClass,classYear{i});
+                    entryHash4L = entryHash4L(filter);
+                    entryClass = entryClass(filter);
+                    if ~isempty(entryHash4L)
                         newFileList(i,j+1) = join(entryHash4L,', ');
                     else
                         newFileList{i,j+1} = '-';
