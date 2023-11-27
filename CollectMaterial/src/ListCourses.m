@@ -2,7 +2,7 @@
 %
 % by Dr. Guan Guoqiang @ SCUT on 2023/11/22
 
-function courseList = ListCourses(currentYear,filePath)
+function [courseList,log] = ListCourses(currentYear,filePath)
     % 输入参数检查；将输入变量currentYear转为数值
     if ~exist('currentYear','var')
         currentYear = "2023"; % 缺省值为2022-2023学年
@@ -20,7 +20,7 @@ function courseList = ListCourses(currentYear,filePath)
     classList = string([currentYear-4:currentYear-1]);
     classYear = strcat(num2str(currentYear-1),'-',num2str(currentYear),'学年'); % 学年字段
     % 初始化表变量courseList
-    load('database.mat','db_Curriculum2021'); 
+    load('database.mat','db_Curriculum2021');
     courseList = db_Curriculum2021(:,[1:5,8]); courseList(:,:) = []; % 注意2021年培养方案课程表变量中第8列（Remark）存有是否需要提交备案标记
     courseList.Indicator = cell(height(courseList),1);
     courseList.Class = string([]);
@@ -41,6 +41,8 @@ function courseList = ListCourses(currentYear,filePath)
         curriculumName = sprintf('db_Curriculum%s',curriculumYear);
         indicatorName = sprintf('db_Indicators%s',curriculumYear);
         load('database.mat',curriculumName,indicatorName)
+        log = sprintf('从%s中载入%s年课程表%s及指标点列表%s',...
+            which('database.mat'),classList{i},curriculumName,indicatorName);
         curriculum = eval(curriculumName);
         indicators = eval(indicatorName);
         % 2019年培养方案的课程表用字段TypeID标识课程类型、没有字段Email且指标点数目不同于2021年
