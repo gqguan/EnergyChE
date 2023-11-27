@@ -27,6 +27,8 @@ function courseList = ListCourses(currentYear,filePath)
     % 在courseList中存入各年级上、下学期的课程
     for i = 1:length(classList)
         switch classList{i}
+            case({'2017','2018'})
+                curriculumYear = '2017';
             case({'2019','2020'})
                 curriculumYear = '2019';
             case({'2021','2022'})
