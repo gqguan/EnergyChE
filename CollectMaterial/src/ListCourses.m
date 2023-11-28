@@ -26,23 +26,10 @@ function [courseList,log] = ListCourses(currentYear,filePath)
     courseList.Class = string([]);
     % 在courseList中存入各年级上、下学期的课程
     for i = 1:length(classList)
-        switch classList{i}
-            case({'2017','2018'})
-                curriculumYear = '2017';
-            case({'2019','2020'})
-                curriculumYear = '2019';
-            case({'2021','2022'})
-                curriculumYear = '2021';
-            case({'2023','2034'})
-                curriculumYear = '2023';
-            otherwise
-                error('database.mat中无%s年级学生相应的培养方案数据！',classList{i})
-        end
+        curriculumYear = GetCurriculumYear(classList{i});
         curriculumName = sprintf('db_Curriculum%s',curriculumYear);
         indicatorName = sprintf('db_Indicators%s',curriculumYear);
         load('database.mat',curriculumName,indicatorName)
-        log = sprintf('从%s中载入%s年课程表%s及指标点列表%s',...
-            which('database.mat'),classList{i},curriculumName,indicatorName);
         curriculum = eval(curriculumName);
         indicators = eval(indicatorName);
         % 2019年培养方案的课程表用字段TypeID标识课程类型、没有字段Email且指标点数目不同于2021年
@@ -59,7 +46,9 @@ function [courseList,log] = ListCourses(currentYear,filePath)
         Class = arrayfun(@(x)strcat(classList{i},"级"),(1:size(reqMatrix,1))');
         courseList = [courseList;[curriculum(idx1,[1:5,end]),table(Indicator)],table(Class)];
         courseList = courseList(contains(courseList.Remark,"提交备案"),:);
-    end    
+    end
+    log = sprintf('从%s中载入%s年培养方案数据',which('database.mat'),...
+        join(unique(GetCurriculumYear(classList)),' '));
     % 在courseList中添加“课程负责人”列
     courseList.Teacher = arrayfun(@(x)string,(1:height(courseList))');
     % 输出excel文件供教务通知给相应课程负责人
